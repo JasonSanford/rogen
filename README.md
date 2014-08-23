@@ -1,3 +1,3 @@
 ## blart
 
-protect and serve
+observe and report
