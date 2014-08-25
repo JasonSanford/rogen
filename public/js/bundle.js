@@ -308,6 +308,9 @@ module.exports = function (headers) {
 },{"for-each":4,"trim":6}],8:[function(require,module,exports){
 var xhr = require('xhr');
 
+var map_utils = require('./map_utils');
+
+/*
 function success (error, response, body) {
   console.log(body);
 }
@@ -316,5 +319,60 @@ xhr({
   url: '/api/form',
   json: true
 }, success);
+*/
 
-},{"xhr":1}]},{},[8])
+var map = map_utils.createMap('map-container');
+
+},{"./map_utils":9,"xhr":1}],9:[function(require,module,exports){
+var layer_configs = require('./layer_configs');
+
+function createMap(div_id, options) {
+  var map = new L.Map(div_id, {
+    center: [0, 0],
+    zoom: 4
+  });
+
+  streets_layer = new L.TileLayer(layer_configs.mapbox_streets.url, layer_configs.mapbox_streets.options);
+  satellite_layer = new L.TileLayer(layer_configs.mapbox_satellite.url, layer_configs.mapbox_satellite.options);
+
+  geojson_options = {};
+  features = new L.GeoJSON(null, geojson_options);
+
+  map.addLayer(streets_layer);
+  map.addLayer(features);
+
+  var base_layers = {
+    'Street': streets_layer,
+    'Satellite': satellite_layer
+  };
+  L.control.layers(base_layers, null).addTo(map);
+  return map;
+}
+
+module.exports = {
+  createMap: createMap
+};
+},{"./layer_configs":10}],10:[function(require,module,exports){
+var layer_configs = {
+  mapbox_streets: {
+      name: 'MapBox Streets',
+      url: 'https://{s}.tiles.mapbox.com/v3/spatialnetworks.map-6l9yntw9/{z}/{x}/{y}.png',
+      options: {
+        attribution: "Tiles Courtesy of <a href='http://www.mapbox.com/' target='_blank'>MapBox</a> &mdash; <a target='_blank' href='http://creativecommons.org/licenses/by-sa/2.0/'>CC-BY-SA</a> 2014 <a target='_blank' href='http://openstreetmap.org'>OpenStreetMap.org</a> contributors",
+        minZoom: 2,
+        maxZoom: 19
+      }
+    },
+  mapbox_satellite: {
+    name: 'MapBox Satellite',
+    url: 'https://api.tiles.mapbox.com/v3/spatialnetworks.map-xkumo5oi/{z}/{x}/{y}.png',
+    options: {
+      attribution: "Tiles Courtesy of <a href='http://www.mapbox.com/' target='_blank'>MapBox</a>",
+      minZoom: 2,
+      maxZoom: 19
+    }
+  }
+};
+
+module.exports = layer_configs;
+},{}]},{},[8])

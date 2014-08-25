@@ -8,5 +8,8 @@ body {
 
 .content {
   height: 100%;
-  background-color: #46461f;
+}
+
+#map-container {
+  height: 100%;
 }
