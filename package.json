@@ -5,7 +5,7 @@
   "scripts": {
     "start": "coffee ./bin/www",
     "build": "browserify assets/js/main.js > assets/js/bundle.js",
-    "watch": "watchify assets/js/main.js -o assets/js/bundle.js -dv",
+    "watch": "watchify -t coffeeify --extension='.coffee' assets/js/src/main.coffee -o assets/js/lib/bundle.js -dv",
     "dev": "npm run start & npm run watch"
   },
   "dependencies": {
@@ -17,5 +17,8 @@
     "coffee-script": "~1.7.1",
     "fulcrum-app": "~0.2.1",
     "xhr": "~1.15.0"
+  },
+  "devDependencies": {
+    "coffeeify": "~0.7.0"
   }
 }
