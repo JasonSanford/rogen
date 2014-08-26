@@ -14,7 +14,7 @@ app.set 'view engine', 'jade'
 app.use logger('dev')
 app.use bodyParser.json()
 app.use bodyParser.urlencoded()
-app.use '/static', express.static(path.join __dirname, 'public')
+app.use '/static', express.static(path.join __dirname, 'assets')
 
 app.use '/'   , routes
 app.use '/api', api_routes

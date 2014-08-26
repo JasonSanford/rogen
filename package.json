@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "start": "coffee ./bin/www",
-    "build": "browserify public/js/main.js > public/js/bundle.js",
-    "watch": "watchify public/js/main.js -o public/js/bundle.js -dv",
+    "build": "browserify assets/js/main.js > assets/js/bundle.js",
+    "watch": "watchify assets/js/main.js -o assets/js/bundle.js -dv",
     "dev": "npm run start & npm run watch"
   },
   "dependencies": {
