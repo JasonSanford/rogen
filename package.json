@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "coffee ./bin/www",
-    "build": "browserify assets/js/main.js > assets/js/bundle.js",
+    "build": "browserify -t coffeeify --extension='.coffee' assets/js/src/main.coffee -o assets/js/lib/bundle.js",
     "watch": "watchify -t coffeeify --extension='.coffee' assets/js/src/main.coffee -o assets/js/lib/bundle.js -dv",
     "dev": "npm run start & npm run watch"
   },
