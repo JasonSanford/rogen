@@ -10,10 +10,8 @@ createMap = (div_id, options) ->
   satellite_layer = new L.TileLayer layer_configs.mapbox_satellite.url, layer_configs.mapbox_satellite.options
 
   geojson_options = {}
-  features = new L.GeoJSON null, geojson_options
-
+  
   map.addLayer streets_layer
-  map.addLayer features
 
   base_layers =
     'Street': streets_layer,
@@ -21,5 +19,10 @@ createMap = (div_id, options) ->
   L.control.layers(base_layers, null).addTo map
   map
 
+createGeoJSONLayer = (geojson_options) ->
+  layer = new L.GeoJSON null, geojson_options
+  layer
+
 module.exports =
-  createMap: createMap
+  createMap          : createMap
+  createGeoJSONLayer : createGeoJSONLayer

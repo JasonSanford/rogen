@@ -6,6 +6,10 @@ body {
   padding-top: 50px;
 }
 
+.navbar .white {
+  color: #fff;
+}
+
 .content {
   height: 100%;
 }
