@@ -17,3 +17,7 @@ body {
 #map-container {
   height: 100%;
 }
+
+.new-record-modal .new-record-map-container {
+  height: 200px;
+}

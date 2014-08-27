@@ -1,9 +1,21 @@
+map_utils = require '../map_utils'
+
 class Creator
   constructor: ->
-    @creator_modal = $('#new-record-modal')
+    @$modal_container = $('#new-record-modal')
+    @$map_container   = @$modal_container.find('.new-record-map-container')
     @init()
 
+  createMap: ->
+    @map = map_utils.createMap @$map_container[0], {zoomControl: false}
+
+  initEvents: ->
+    @$modal_container.on 'shown.bs.modal', (event) =>
+      # We need to make sure animations are finished before creating the map
+      @createMap()
+
   init: ->
-    @creator_modal.modal()
+    @initEvents()
+    @$modal_container.modal()
 
 module.exports = Creator

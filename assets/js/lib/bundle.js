@@ -39,20 +39,23 @@ $('#new-record-a').on('click', function(event) {
 
 
 },{"./map_utils":2,"./records/creator":4,"./records/utils":5}],2:[function(require,module,exports){
-var createGeoJSONLayer, createMap, layer_configs;
+var createGeoJSONLayer, createMap, layer_configs, utils;
 
 layer_configs = require('./layer_configs');
 
+utils = require('../utils');
+
 createMap = function(div_id, options) {
-  var base_layers, geojson_options, map, map_options, satellite_layer, streets_layer;
+  var base_layers, map, map_options, satellite_layer, streets_layer;
   map_options = {
     center: [0, 0],
-    zoom: 4
+    zoom: 4,
+    attributionControl: false
   };
+  utils.extend(map_options, options);
   map = new L.Map(div_id, map_options);
   streets_layer = new L.TileLayer(layer_configs.mapbox_streets.url, layer_configs.mapbox_streets.options);
   satellite_layer = new L.TileLayer(layer_configs.mapbox_satellite.url, layer_configs.mapbox_satellite.options);
-  geojson_options = {};
   map.addLayer(streets_layer);
   base_layers = {
     'Street': streets_layer,
@@ -75,7 +78,7 @@ module.exports = {
 
 
 
-},{"./layer_configs":3}],3:[function(require,module,exports){
+},{"../utils":6,"./layer_configs":3}],3:[function(require,module,exports){
 var layer_configs;
 
 layer_configs = {
@@ -104,16 +107,34 @@ module.exports = layer_configs;
 
 
 },{}],4:[function(require,module,exports){
-var Creator;
+var Creator, map_utils;
+
+map_utils = require('../map_utils');
 
 Creator = (function() {
   function Creator() {
-    this.creator_modal = $('#new-record-modal');
+    this.$modal_container = $('#new-record-modal');
+    this.$map_container = this.$modal_container.find('.new-record-map-container');
     this.init();
   }
 
+  Creator.prototype.createMap = function() {
+    return this.map = map_utils.createMap(this.$map_container[0], {
+      zoomControl: false
+    });
+  };
+
+  Creator.prototype.initEvents = function() {
+    return this.$modal_container.on('shown.bs.modal', (function(_this) {
+      return function(event) {
+        return _this.createMap();
+      };
+    })(this));
+  };
+
   Creator.prototype.init = function() {
-    return this.creator_modal.modal();
+    this.initEvents();
+    return this.$modal_container.modal();
   };
 
   return Creator;
@@ -124,7 +145,7 @@ module.exports = Creator;
 
 
 
-},{}],5:[function(require,module,exports){
+},{"../map_utils":2}],5:[function(require,module,exports){
 var getRecords, showRecordData, xhr;
 
 xhr = require('xhr');
@@ -156,7 +177,25 @@ module.exports = {
 
 
 
-},{"xhr":6}],6:[function(require,module,exports){
+},{"xhr":7}],6:[function(require,module,exports){
+var extend;
+
+extend = function(object, properties) {
+  var key, val;
+  for (key in properties) {
+    val = properties[key];
+    object[key] = val;
+  }
+  return object;
+};
+
+module.exports = {
+  extend: extend
+};
+
+
+
+},{}],7:[function(require,module,exports){
 var window = require("global/window")
 var once = require("once")
 var parseHeaders = require('parse-headers')
@@ -328,7 +367,7 @@ function createXHR(options, callback) {
 
 function noop() {}
 
-},{"global/window":7,"once":8,"parse-headers":12}],7:[function(require,module,exports){
+},{"global/window":8,"once":9,"parse-headers":13}],8:[function(require,module,exports){
 (function (global){
 if (typeof window !== "undefined") {
     module.exports = window
@@ -339,7 +378,7 @@ if (typeof window !== "undefined") {
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 module.exports = once
 
 once.proto = once(function () {
@@ -360,7 +399,7 @@ function once (fn) {
   }
 }
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 var isFunction = require('is-function')
 
 module.exports = forEach
@@ -408,7 +447,7 @@ function forEachObject(object, iterator, context) {
     }
 }
 
-},{"is-function":10}],10:[function(require,module,exports){
+},{"is-function":11}],11:[function(require,module,exports){
 module.exports = isFunction
 
 var toString = Object.prototype.toString
@@ -425,7 +464,7 @@ function isFunction (fn) {
       fn === window.prompt))
 };
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 
 exports = module.exports = trim;
 
@@ -441,7 +480,7 @@ exports.right = function(str){
   return str.replace(/\s*$/, '');
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 var trim = require('trim')
   , forEach = require('for-each')
 
@@ -463,4 +502,4 @@ module.exports = function (headers) {
 
   return result
 }
-},{"for-each":9,"trim":11}]},{},[1])
+},{"for-each":10,"trim":12}]},{},[1])

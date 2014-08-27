@@ -36,9 +36,7 @@ block content
           .modal-footer
             button.btn.btn-default(type='button', data-dismiss='modal').
               Close
-            button.btn.btn-primary(type='button').
-              Save changes
-    .modal.fade(role='dialog', id='new-record-modal', tabindex='-1')
+    .modal.fade.new-record-modal(role='dialog', id='new-record-modal', tabindex='-1')
       .modal-dialog
         .modal-content
           .modal-header
@@ -49,8 +47,8 @@ block content
                 Close
             h4.modal-title(id='myModalLabel').
               New Record
-          .modal-body.
-            Yo Dawg
+          .modal-body
+            .new-record-map-container
           .modal-footer
             button.btn.btn-default(type='button', data-dismiss='modal').
               Cancel
