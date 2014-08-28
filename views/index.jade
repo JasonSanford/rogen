@@ -10,7 +10,7 @@ block content
           span.icon-bar
           span.icon-bar
           span.icon-bar
-        a.navbar-brand(href='#').
+        a.navbar-brand(href='/', id='brand').
           Blart
       .navbar-collapse.collapse(id='nav-collapse')
         ul.nav.navbar-nav.navbar-right
@@ -25,12 +25,12 @@ block content
         .modal-content
           .modal-header
             button(type='button', class='close', data-dismiss='modal')
-              span(aria-hidden='true')
+              span(aria-hidden='true').
                 &times;
               span.sr-only.
                 Close
-            h4.modal-title(id='myModalLabel').
-              Modal title
+            h4.modal-title.
+              Title
           .modal-body.
             Yo Dawg
           .modal-footer
@@ -41,7 +41,7 @@ block content
         .modal-content
           .modal-header
             button(type='button', class='close', data-dismiss='modal')
-              span(aria-hidden='true')
+              span(aria-hidden='true').
                 &times;
               span.sr-only.
                 Close

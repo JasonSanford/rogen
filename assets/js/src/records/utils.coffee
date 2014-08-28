@@ -1,8 +1,5 @@
 xhr = require 'xhr'
 
-showRecordData = (record_geojson) ->
-  console.log record_geojson
-
 getRecords = (cb) ->
   xhr_options =
     uri: '/api/records'
@@ -15,5 +12,4 @@ getRecords = (cb) ->
   xhr xhr_options, xhr_callback
 
 module.exports =
-  showRecordData : showRecordData
-  getRecords     : getRecords
+  getRecords: getRecords

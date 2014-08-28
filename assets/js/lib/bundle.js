@@ -3,8 +3,16 @@ var Form;
 
 Form = (function() {
   function Form(form_json) {
-    this.form_json = form_json;
+    this.form_obj = form_json.form;
   }
+
+  Form.prototype.name = function() {
+    return this.form_obj.name;
+  };
+
+  Form.prototype.record_title_key = function() {
+    return this.form_obj.record_title_key;
+  };
 
   return Form;
 
@@ -41,12 +49,14 @@ module.exports = {
 
 
 
-},{"xhr":10}],3:[function(require,module,exports){
-var Form, RecordCreator, async, features_layer, formAndRecordsCallback, form_utils, geojson_layer_options, getForm, getRecords, map, map_utils, record_utils;
+},{"xhr":12}],3:[function(require,module,exports){
+var Form, Record, RecordCreator, RecordDisplay, async, formAndRecordsCallback, form_utils, getForm, getRecords, map, map_utils, nameApp, record_utils;
 
 async = require('async');
 
 Form = require('./form');
+
+Record = require('./record');
 
 map_utils = require('./map_utils');
 
@@ -54,21 +64,11 @@ form_utils = require('./form_utils');
 
 record_utils = require('./records/utils');
 
+RecordDisplay = require('./records/display');
+
 RecordCreator = require('./records/creator');
 
 map = map_utils.createMap('map-container');
-
-geojson_layer_options = {
-  onEachFeature: function(feature, layer) {
-    return layer.on('click', function() {
-      return record_utils.showRecordData(feature);
-    });
-  }
-};
-
-features_layer = map_utils.createGeoJSONLayer(geojson_layer_options);
-
-map.addLayer(features_layer);
 
 getForm = function(callback) {
   return form_utils.getForm(function(error, form) {
@@ -90,15 +90,32 @@ getRecords = function(callback) {
   });
 };
 
+nameApp = function(app_name) {
+  document.title = app_name;
+  return $('#brand').text(app_name);
+};
+
 formAndRecordsCallback = function(error, results) {
-  var form, form_json, records;
+  var features_layer, form, form_json, geojson_layer_options, records;
   if (error) {
     console.log(error);
     return;
   }
-  form_json = results[0];
-  records = results[1];
+  form_json = results.form;
+  records = results.records;
   form = new Form(form_json);
+  nameApp(form.name());
+  geojson_layer_options = {
+    onEachFeature: function(feature, layer) {
+      return layer.on('click', function() {
+        var record, record_display;
+        record = new Record(feature, form);
+        return record_display = new RecordDisplay(form, record);
+      });
+    }
+  };
+  features_layer = map_utils.createGeoJSONLayer(geojson_layer_options);
+  map.addLayer(features_layer);
   features_layer.addData(records);
   map.fitBounds(features_layer.getBounds());
   return $('#new-record-a').on('click', function(event) {
@@ -108,11 +125,14 @@ formAndRecordsCallback = function(error, results) {
   });
 };
 
-async.parallel([getForm, getRecords], formAndRecordsCallback);
+async.parallel({
+  form: getForm,
+  records: getRecords
+}, formAndRecordsCallback);
 
 
 
-},{"./form":1,"./form_utils":2,"./map_utils":4,"./records/creator":6,"./records/utils":7,"async":9}],4:[function(require,module,exports){
+},{"./form":1,"./form_utils":2,"./map_utils":4,"./record":6,"./records/creator":7,"./records/display":8,"./records/utils":9,"async":11}],4:[function(require,module,exports){
 var createGeoJSONLayer, createMap, layer_configs, utils;
 
 layer_configs = require('./layer_configs');
@@ -152,7 +172,7 @@ module.exports = {
 
 
 
-},{"../utils":8,"./layer_configs":5}],5:[function(require,module,exports){
+},{"../utils":10,"./layer_configs":5}],5:[function(require,module,exports){
 var layer_configs;
 
 layer_configs = {
@@ -181,6 +201,33 @@ module.exports = layer_configs;
 
 
 },{}],6:[function(require,module,exports){
+var Record;
+
+Record = (function() {
+  function Record(record_geojson, form) {
+    this.record_geojson = record_geojson;
+    this.form = form;
+  }
+
+  Record.prototype.title = function() {
+    var title_key;
+    title_key = this.form.record_title_key();
+    if (this.record_geojson.properties[title_key]) {
+      return this.record_geojson.properties[title_key];
+    } else {
+      return '';
+    }
+  };
+
+  return Record;
+
+})();
+
+module.exports = Record;
+
+
+
+},{}],7:[function(require,module,exports){
 var Creator, map_utils;
 
 map_utils = require('../map_utils');
@@ -202,8 +249,7 @@ Creator = (function() {
   Creator.prototype.initEvents = function() {
     return this.$modal_container.on('shown.bs.modal', (function(_this) {
       return function(event) {
-        _this.createMap();
-        return console.log(_this.form);
+        return _this.createMap();
       };
     })(this));
   };
@@ -221,14 +267,36 @@ module.exports = Creator;
 
 
 
-},{"../map_utils":4}],7:[function(require,module,exports){
-var getRecords, showRecordData, xhr;
+},{"../map_utils":4}],8:[function(require,module,exports){
+var Display;
+
+Display = (function() {
+  function Display(form, record) {
+    this.form = form;
+    this.record = record;
+    this.$modal_container = $('#record-modal');
+    this.init();
+  }
+
+  Display.prototype.init = function() {
+    console.log(this.record);
+    console.log(this.form);
+    this.$modal_container.find('.modal-title').text(this.record.title());
+    return this.$modal_container.modal();
+  };
+
+  return Display;
+
+})();
+
+module.exports = Display;
+
+
+
+},{}],9:[function(require,module,exports){
+var getRecords, xhr;
 
 xhr = require('xhr');
-
-showRecordData = function(record_geojson) {
-  return console.log(record_geojson);
-};
 
 getRecords = function(cb) {
   var xhr_callback, xhr_options;
@@ -247,13 +315,12 @@ getRecords = function(cb) {
 };
 
 module.exports = {
-  showRecordData: showRecordData,
   getRecords: getRecords
 };
 
 
 
-},{"xhr":10}],8:[function(require,module,exports){
+},{"xhr":12}],10:[function(require,module,exports){
 var extend;
 
 extend = function(object, properties) {
@@ -271,7 +338,7 @@ module.exports = {
 
 
 
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 (function (process){
 /*!
  * async
@@ -1398,7 +1465,7 @@ module.exports = {
 }());
 
 }).call(this,require("UPikzY"))
-},{"UPikzY":17}],10:[function(require,module,exports){
+},{"UPikzY":19}],12:[function(require,module,exports){
 var window = require("global/window")
 var once = require("once")
 var parseHeaders = require('parse-headers')
@@ -1570,7 +1637,7 @@ function createXHR(options, callback) {
 
 function noop() {}
 
-},{"global/window":11,"once":12,"parse-headers":16}],11:[function(require,module,exports){
+},{"global/window":13,"once":14,"parse-headers":18}],13:[function(require,module,exports){
 (function (global){
 if (typeof window !== "undefined") {
     module.exports = window
@@ -1581,7 +1648,7 @@ if (typeof window !== "undefined") {
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],12:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 module.exports = once
 
 once.proto = once(function () {
@@ -1602,7 +1669,7 @@ function once (fn) {
   }
 }
 
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 var isFunction = require('is-function')
 
 module.exports = forEach
@@ -1650,7 +1717,7 @@ function forEachObject(object, iterator, context) {
     }
 }
 
-},{"is-function":14}],14:[function(require,module,exports){
+},{"is-function":16}],16:[function(require,module,exports){
 module.exports = isFunction
 
 var toString = Object.prototype.toString
@@ -1667,7 +1734,7 @@ function isFunction (fn) {
       fn === window.prompt))
 };
 
-},{}],15:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 
 exports = module.exports = trim;
 
@@ -1683,7 +1750,7 @@ exports.right = function(str){
   return str.replace(/\s*$/, '');
 };
 
-},{}],16:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var trim = require('trim')
   , forEach = require('for-each')
 
@@ -1705,7 +1772,7 @@ module.exports = function (headers) {
 
   return result
 }
-},{"for-each":13,"trim":15}],17:[function(require,module,exports){
+},{"for-each":15,"trim":17}],19:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};

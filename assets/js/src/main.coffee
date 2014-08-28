@@ -1,20 +1,14 @@
 async = require 'async'
 
 Form          = require './form'
+Record        = require './record'
 map_utils     = require './map_utils'
 form_utils    = require './form_utils'
 record_utils  = require './records/utils'
+RecordDisplay = require './records/display'
 RecordCreator = require './records/creator'
 
 map = map_utils.createMap 'map-container'
-
-geojson_layer_options =
-  onEachFeature: (feature, layer) ->
-    layer.on 'click', ->
-      record_utils.showRecordData feature
-features_layer = map_utils.createGeoJSONLayer geojson_layer_options
-
-map.addLayer features_layer
 
 getForm = (callback) ->
   form_utils.getForm (error, form) ->
@@ -30,21 +24,36 @@ getRecords = (callback) ->
     else
       callback null, records
 
+nameApp = (app_name) ->
+  document.title = app_name
+  $('#brand').text app_name
+
 formAndRecordsCallback = (error, results) ->
   if error
     console.log error
     return
 
-  form_json = results[0]
-  records   = results[1]
+  form_json = results.form
+  records   = results.records
 
   form = new Form form_json
+
+  nameApp form.name()
+
+  geojson_layer_options =
+    onEachFeature: (feature, layer) ->
+      layer.on 'click', ->
+        record = new Record feature, form
+        record_display = new RecordDisplay form, record
+  features_layer = map_utils.createGeoJSONLayer geojson_layer_options
+
+  map.addLayer features_layer
 
   features_layer.addData records
   map.fitBounds features_layer.getBounds()
 
   $('#new-record-a').on 'click', (event) ->
     event.preventDefault()
-    record_creator = new RecordCreator(form)
+    record_creator = new RecordCreator form
 
-async.parallel [getForm, getRecords], formAndRecordsCallback
+async.parallel {form: getForm, records: getRecords}, formAndRecordsCallback
