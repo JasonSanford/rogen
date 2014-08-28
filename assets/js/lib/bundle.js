@@ -215,7 +215,7 @@ Record = (function() {
     if (this.record_geojson.properties[title_key]) {
       return this.record_geojson.properties[title_key];
     } else {
-      return '';
+      return '&nbsp;';
     }
   };
 
@@ -278,10 +278,52 @@ Display = (function() {
     this.init();
   }
 
+  Display.prototype.generateElementHTML = function(element) {
+    var html_parts, inner_element, inner_element_html, inner_html_parts, panelBody, _i, _len, _ref;
+    panelBody = function(panel_html) {
+      return "<div class='panel-body'>" + panel_html + "</div>";
+    };
+    html_parts = ['<div class="panel panel-default">'];
+    if (element.type === 'Section') {
+      html_parts.push("<div class='panel-heading'><h3 class='panel-title'>" + element.label + "</h3></div>");
+      _ref = element.elements;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        inner_element = _ref[_i];
+        inner_element_html = this.generateElementHTML(inner_element);
+        html_parts.push(panelBody(inner_element_html));
+      }
+    } else if (element.type === 'YesNoField') {
+      inner_html_parts = ["<p><strong>" + element.label + "</strong>"];
+      if (this.record.record_geojson.properties[element.key]) {
+        inner_html_parts.push(this.record.record_geojson.properties[element.key]);
+      }
+      inner_html_parts.push('</p>');
+      html_parts.push(panelBody(inner_html_parts.join('')));
+    } else if (element.type === 'TextField') {
+      html_parts.push(panelBody("<h4>" + element.label + "</h4><p>" + this.record.record_geojson.properties[element.key] + "</p>"));
+    }
+    html_parts.push('</div>');
+    return html_parts.join('');
+  };
+
+  Display.prototype.generateHTMLContent = function() {
+    var element, html_part, parts, _i, _len, _ref;
+    parts = [];
+    _ref = this.form.form_obj.elements;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      element = _ref[_i];
+      html_part = this.generateElementHTML(element);
+      parts.push(html_part);
+    }
+    return this.html_content = parts.join('');
+  };
+
   Display.prototype.init = function() {
     console.log(this.record);
     console.log(this.form);
-    this.$modal_container.find('.modal-title').text(this.record.title());
+    this.generateHTMLContent();
+    this.$modal_container.find('.modal-title').html(this.record.title());
+    this.$modal_container.find('.modal-body').html(this.html_content);
     return this.$modal_container.modal();
   };
 

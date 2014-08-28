@@ -6,6 +6,6 @@ class Record
     if @record_geojson.properties[title_key]
       @record_geojson.properties[title_key]
     else
-      ''
+      '&nbsp;'
 
 module.exports = Record
