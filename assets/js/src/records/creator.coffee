@@ -1,7 +1,7 @@
 map_utils = require '../map_utils'
 
 class Creator
-  constructor: ->
+  constructor: (@form) ->
     @$modal_container = $('#new-record-modal')
     @$map_container   = @$modal_container.find('.new-record-map-container')
     @init()
@@ -13,6 +13,7 @@ class Creator
     @$modal_container.on 'shown.bs.modal', (event) =>
       # We need to make sure animations are finished before creating the map
       @createMap()
+      console.log @form
 
   init: ->
     @initEvents()
