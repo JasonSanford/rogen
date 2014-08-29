@@ -321,11 +321,14 @@ Display = (function() {
   Display.prototype.photo_displays = [];
 
   Display.prototype.generateElementHTML = function(element) {
-    var choice_values, html_parts, inner_element, inner_element_html, inner_html_parts, other_values, panelBody, photo, photos_html_parts, value, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3, _ref4;
-    panelBody = function(panel_html) {
-      return "<div class='panel-body'>" + panel_html + "</div>";
+    var choice_values, html, html_parts, inner_element, inner_element_html, inner_html_parts, other_values, panel, panelBody, photo, photos_html_parts, value, values, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3, _ref4;
+    panelBody = function(panel_body_html) {
+      return "<div class='panel-body'>" + panel_body_html + "</div>";
     };
-    html_parts = ['<div class="panel panel-default">'];
+    panel = function(panel_html) {
+      return "<div class='panel panel-default'>" + panel_html + "</div>";
+    };
+    html_parts = [];
     if ((_ref = element.type) === 'Section' || _ref === 'PhotoField') {
       html_parts.push("<div class='panel-heading'><h3 class='panel-title'>" + element.label + "</h3></div>");
       if (element.type === 'Section') {
@@ -334,6 +337,7 @@ Display = (function() {
           inner_element = _ref1[_i];
           inner_element_html = this.generateElementHTML(inner_element);
           html_parts.push(panelBody(inner_element_html));
+          html = panel(html_parts.join(''));
         }
       } else if (element.type === 'PhotoField') {
         if (this.record.record_geojson.properties[element.key]) {
@@ -346,6 +350,7 @@ Display = (function() {
           }
           photos_html_parts.push('</div>');
           html_parts.push(panelBody(photos_html_parts.join('')));
+          html = panel(html_parts.join(''));
         }
       }
     } else if ((_ref3 = element.type) === 'YesNoField' || _ref3 === 'ChoiceField' || _ref3 === 'DateTimeField' || _ref3 === 'TimeField') {
@@ -356,7 +361,12 @@ Display = (function() {
         } else if (element.type === 'ChoiceField') {
           choice_values = this.record.record_geojson.properties[element.key].choice_values;
           other_values = this.record.record_geojson.properties[element.key].other_values;
-          value = choice_values.length ? choice_values[0] : other_values[0];
+          if (element.multiple) {
+            values = choice_values.concat(other_values);
+            value = values.join(', ');
+          } else {
+            value = choice_values.length ? choice_values[0] : other_values[0];
+          }
           if (!value) {
             value = '&nbsp;';
           }
@@ -367,11 +377,14 @@ Display = (function() {
       }
       inner_html_parts.push('</dl>');
       html_parts.push(panelBody(inner_html_parts.join('')));
+      html = panel(html_parts.join(''));
     } else if (element.type === 'TextField') {
       html_parts.push(panelBody("<h4>" + element.label + "</h4><p>" + this.record.record_geojson.properties[element.key] + "</p>"));
+      html = panel(html_parts.join(''));
+    } else if (element.type === 'Label') {
+      html = "<div class='alert alert-info'>" + element.label + "</div>";
     }
-    html_parts.push('</div>');
-    return html_parts.join('');
+    return html;
   };
 
   Display.prototype.generateHTMLContent = function() {
