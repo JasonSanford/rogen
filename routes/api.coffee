@@ -29,12 +29,20 @@ router.get '/records', (req, res) ->
   fulcrum.records.search params, callback
 
 router.get '/photos/:photo_id', (req, res) ->
-  callback = (error, form) ->
+  callback = (error, photo) ->
     if error
       console.log "Error: #{error}"
       res.send 'Error'
-    res.json form
+    res.json photo
   fulcrum.photos.find req.params.photo_id, callback
+
+router.get '/classification_sets/:classification_set_id', (req, res) ->
+  callback = (error, classfication_set) ->
+    if error
+      console.log "Error: #{error}"
+      res.send 'Error'
+    res.json classfication_set
+  fulcrum.classification_sets.find req.params.classification_set_id, callback
 
 recordsToFeatureCollection = (records) ->
   feature_collection =

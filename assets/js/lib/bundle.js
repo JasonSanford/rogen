@@ -1,10 +1,93 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var Form;
+var ClassificationSet;
+
+ClassificationSet = (function() {
+  function ClassificationSet(classification_set_json) {
+    this.classification_set_obj = classification_set_json.classification_set;
+  }
+
+  ClassificationSet.prototype.name = function() {
+    return this.classification_set_obj.name;
+  };
+
+  ClassificationSet.prototype.id = function() {
+    return this.classification_set_obj.id;
+  };
+
+  ClassificationSet.prototype.getValueByID = function(id) {
+    var item, _i, _len, _ref;
+    _ref = this.classification_set_obj.items;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      item = _ref[_i];
+      if (item.value === id) {
+        return item.label;
+      }
+    }
+    return '';
+  };
+
+  return ClassificationSet;
+
+})();
+
+module.exports = ClassificationSet;
+
+
+
+},{}],2:[function(require,module,exports){
+var ClassificationSet, Form, xhr;
+
+xhr = require('xhr');
+
+ClassificationSet = require('./classification_set');
 
 Form = (function() {
   function Form(form_json) {
     this.form_obj = form_json.form;
+    this.init();
   }
+
+  Form.prototype.classification_sets = {};
+
+  Form.prototype.init = function() {
+    return this.findClassificationSets(this.form_obj.elements);
+  };
+
+  Form.prototype.findClassificationSets = function(elements) {
+    var element, _i, _len, _results;
+    _results = [];
+    for (_i = 0, _len = elements.length; _i < _len; _i++) {
+      element = elements[_i];
+      if (element.type === 'Section') {
+        _results.push(this.findClassificationSets(element.elements));
+      } else if (element.type === 'ClassificationField') {
+        _results.push(this.fetchClassificationSet(element.classification_set_id));
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
+
+  Form.prototype.fetchClassificationSet = function(classification_set_id) {
+    var xhr_callback, xhr_options;
+    xhr_options = {
+      uri: "/api/classification_sets/" + classification_set_id,
+      json: true
+    };
+    xhr_callback = (function(_this) {
+      return function(error, response, classification_set_obj) {
+        var classification_set;
+        if (error) {
+          console.log(error);
+          return;
+        }
+        classification_set = new ClassificationSet(classification_set_obj);
+        return _this.classification_sets[classification_set_id] = classification_set;
+      };
+    })(this);
+    return xhr(xhr_options, xhr_callback);
+  };
 
   Form.prototype.name = function() {
     return this.form_obj.name;
@@ -22,7 +105,7 @@ module.exports = Form;
 
 
 
-},{}],2:[function(require,module,exports){
+},{"./classification_set":1,"xhr":14}],3:[function(require,module,exports){
 var getForm, xhr;
 
 xhr = require('xhr');
@@ -49,7 +132,7 @@ module.exports = {
 
 
 
-},{"xhr":13}],3:[function(require,module,exports){
+},{"xhr":14}],4:[function(require,module,exports){
 var Form, Record, RecordCreator, RecordDisplay, async, formAndRecordsCallback, form_utils, getForm, getRecords, map, map_utils, nameApp, record_utils;
 
 async = require('async');
@@ -132,7 +215,7 @@ async.parallel({
 
 
 
-},{"./form":1,"./form_utils":2,"./map_utils":4,"./record":7,"./records/creator":8,"./records/display":9,"./records/utils":10,"async":12}],4:[function(require,module,exports){
+},{"./form":2,"./form_utils":3,"./map_utils":5,"./record":8,"./records/creator":9,"./records/display":10,"./records/utils":11,"async":13}],5:[function(require,module,exports){
 var createGeoJSONLayer, createMap, layer_configs, utils;
 
 layer_configs = require('./layer_configs');
@@ -172,7 +255,7 @@ module.exports = {
 
 
 
-},{"../utils":11,"./layer_configs":5}],5:[function(require,module,exports){
+},{"../utils":12,"./layer_configs":6}],6:[function(require,module,exports){
 var layer_configs;
 
 layer_configs = {
@@ -200,7 +283,7 @@ module.exports = layer_configs;
 
 
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 var PhotoDisplay, xhr;
 
 xhr = require('xhr');
@@ -238,7 +321,7 @@ module.exports = PhotoDisplay;
 
 
 
-},{"xhr":13}],7:[function(require,module,exports){
+},{"xhr":14}],8:[function(require,module,exports){
 var Record;
 
 Record = (function() {
@@ -265,7 +348,7 @@ module.exports = Record;
 
 
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 var Creator, map_utils;
 
 map_utils = require('../map_utils');
@@ -305,7 +388,7 @@ module.exports = Creator;
 
 
 
-},{"../map_utils":4}],9:[function(require,module,exports){
+},{"../map_utils":5}],10:[function(require,module,exports){
 var Display, PhotoDisplay;
 
 PhotoDisplay = require('../photo_display');
@@ -321,7 +404,7 @@ Display = (function() {
   Display.prototype.photo_displays = [];
 
   Display.prototype.generateElementHTML = function(element) {
-    var choice_values, html, html_parts, inner_element, inner_element_html, inner_html_parts, other_values, panel, panelBody, photo, photos_html_parts, value, values, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3, _ref4;
+    var choice_values, display, html, html_parts, inner_element, inner_element_html, inner_html_parts, other_values, panel, panelBody, photo, photos_html_parts, values, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
     panelBody = function(panel_body_html) {
       return "<div class='panel-body'>" + panel_body_html + "</div>";
     };
@@ -353,24 +436,33 @@ Display = (function() {
           html = panel(html_parts.join(''));
         }
       }
-    } else if ((_ref3 = element.type) === 'YesNoField' || _ref3 === 'ChoiceField' || _ref3 === 'DateTimeField' || _ref3 === 'TimeField') {
+    } else if ((_ref3 = element.type) === 'YesNoField' || _ref3 === 'ChoiceField' || _ref3 === 'ClassificationField' || _ref3 === 'DateTimeField' || _ref3 === 'TimeField') {
       inner_html_parts = ["<dl><dt>" + element.label + "</dt>"];
       if (this.record.record_geojson.properties[element.key]) {
         if ((_ref4 = element.type) === 'YesNoField' || _ref4 === 'DateTimeField' || _ref4 === 'TimeField') {
           inner_html_parts.push("<dd>" + this.record.record_geojson.properties[element.key] + "</dd>");
-        } else if (element.type === 'ChoiceField') {
+        } else if ((_ref5 = element.type) === 'ChoiceField' || _ref5 === 'ClassificationField') {
           choice_values = this.record.record_geojson.properties[element.key].choice_values;
           other_values = this.record.record_geojson.properties[element.key].other_values;
           if (element.multiple) {
             values = choice_values.concat(other_values);
-            value = values.join(', ');
           } else {
-            value = choice_values.length ? choice_values[0] : other_values[0];
+            values = [choice_values.length ? choice_values[0] : other_values[0]];
           }
-          if (!value) {
-            value = '&nbsp;';
+          if (element.type === 'ClassificationField') {
+            values = values.map((function(_this) {
+              return function(value) {
+                return _this.form.classification_sets[element.classification_set_id].getValueByID(value);
+              };
+            })(this));
+            display = values.join(', ');
+          } else {
+            display = values.join(', ');
           }
-          inner_html_parts.push("<dd>" + value + "</dd>");
+          if (!display) {
+            display = '%nbsp;';
+          }
+          inner_html_parts.push("<dd>" + display + "</dd>");
         }
       } else {
         inner_html_parts.push('<dd>&nbsp;</dd>');
@@ -422,7 +514,7 @@ module.exports = Display;
 
 
 
-},{"../photo_display":6}],10:[function(require,module,exports){
+},{"../photo_display":7}],11:[function(require,module,exports){
 var getRecords, xhr;
 
 xhr = require('xhr');
@@ -449,7 +541,7 @@ module.exports = {
 
 
 
-},{"xhr":13}],11:[function(require,module,exports){
+},{"xhr":14}],12:[function(require,module,exports){
 var extend;
 
 extend = function(object, properties) {
@@ -467,7 +559,7 @@ module.exports = {
 
 
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 (function (process){
 /*!
  * async
@@ -1594,7 +1686,7 @@ module.exports = {
 }());
 
 }).call(this,require("UPikzY"))
-},{"UPikzY":20}],13:[function(require,module,exports){
+},{"UPikzY":21}],14:[function(require,module,exports){
 var window = require("global/window")
 var once = require("once")
 var parseHeaders = require('parse-headers')
@@ -1766,7 +1858,7 @@ function createXHR(options, callback) {
 
 function noop() {}
 
-},{"global/window":14,"once":15,"parse-headers":19}],14:[function(require,module,exports){
+},{"global/window":15,"once":16,"parse-headers":20}],15:[function(require,module,exports){
 (function (global){
 if (typeof window !== "undefined") {
     module.exports = window
@@ -1777,7 +1869,7 @@ if (typeof window !== "undefined") {
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 module.exports = once
 
 once.proto = once(function () {
@@ -1798,7 +1890,7 @@ function once (fn) {
   }
 }
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 var isFunction = require('is-function')
 
 module.exports = forEach
@@ -1846,7 +1938,7 @@ function forEachObject(object, iterator, context) {
     }
 }
 
-},{"is-function":17}],17:[function(require,module,exports){
+},{"is-function":18}],18:[function(require,module,exports){
 module.exports = isFunction
 
 var toString = Object.prototype.toString
@@ -1863,7 +1955,7 @@ function isFunction (fn) {
       fn === window.prompt))
 };
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 
 exports = module.exports = trim;
 
@@ -1879,7 +1971,7 @@ exports.right = function(str){
   return str.replace(/\s*$/, '');
 };
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var trim = require('trim')
   , forEach = require('for-each')
 
@@ -1901,7 +1993,7 @@ module.exports = function (headers) {
 
   return result
 }
-},{"for-each":16,"trim":18}],20:[function(require,module,exports){
+},{"for-each":17,"trim":19}],21:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -1966,4 +2058,4 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}]},{},[3])
+},{}]},{},[4])

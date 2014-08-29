@@ -32,21 +32,25 @@ class Display
           photos_html_parts.push '</div>'
           html_parts.push panelBody(photos_html_parts.join '')
           html = panel(html_parts.join '')
-    else if element.type in ['YesNoField', 'ChoiceField', 'DateTimeField', 'TimeField']
+    else if element.type in ['YesNoField', 'ChoiceField', 'ClassificationField', 'DateTimeField', 'TimeField']
       inner_html_parts = ["<dl><dt>#{element.label}</dt>"]
       if @record.record_geojson.properties[element.key]
         if element.type in ['YesNoField', 'DateTimeField', 'TimeField']
           inner_html_parts.push "<dd>#{@record.record_geojson.properties[element.key]}</dd>"
-        else if element.type is 'ChoiceField'
+        else if element.type in ['ChoiceField', 'ClassificationField']
           choice_values = @record.record_geojson.properties[element.key].choice_values
           other_values  = @record.record_geojson.properties[element.key].other_values
           if element.multiple
             values = choice_values.concat other_values
-            value  = values.join ', '
           else
-            value = if choice_values.length then choice_values[0] else other_values[0]
-          value = '&nbsp;' if not value
-          inner_html_parts.push "<dd>#{value}</dd>"
+            values = [if choice_values.length then choice_values[0] else other_values[0]]
+          if element.type is 'ClassificationField'
+            values = values.map (value) => @form.classification_sets[element.classification_set_id].getValueByID(value)
+            display = values.join ', '
+          else
+            display = values.join ', '
+          display = '%nbsp;' if not display
+          inner_html_parts.push "<dd>#{display}</dd>"
       else
         inner_html_parts.push '<dd>&nbsp;</dd>'
       inner_html_parts.push '</dl>'
