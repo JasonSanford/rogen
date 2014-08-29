@@ -3,6 +3,7 @@ class Display
     @$modal_container = $('#record-modal')
     @init()
 
+  # TODO: This shit is NASTY, make not nasty.
   generateElementHTML: (element) ->
     panelBody = (panel_html) ->
       "<div class='panel-body'>#{panel_html}</div>"
@@ -13,11 +14,17 @@ class Display
       for inner_element in element.elements
         inner_element_html = @generateElementHTML inner_element
         html_parts.push panelBody(inner_element_html)
-    else if element.type is 'YesNoField'
-      inner_html_parts = ["<p><strong>#{element.label}</strong>"]
+    else if element.type in ['YesNoField', 'ChoiceField']
+      inner_html_parts = ["<dl><dt>#{element.label}</dt>"]
       if @record.record_geojson.properties[element.key]
-        inner_html_parts.push @record.record_geojson.properties[element.key]
-      inner_html_parts.push '</p>'
+        if element.type is 'YesNoField'
+          inner_html_parts.push "<dd>#{@record.record_geojson.properties[element.key]}</dd>"
+        else if element.type is 'ChoiceField'
+          choice_values = @record.record_geojson.properties[element.key].choice_values
+          other_values  = @record.record_geojson.properties[element.key].other_values
+          value = if choice_values.length then choice_values[0] else other_values[0]
+          inner_html_parts.push "<dd>#{value}</dd>"
+      inner_html_parts.push '</dl>'
       html_parts.push panelBody(inner_html_parts.join '')
     else if element.type is 'TextField'
       html_parts.push panelBody("<h4>#{element.label}</h4><p>#{@record.record_geojson.properties[element.key]}</p>")

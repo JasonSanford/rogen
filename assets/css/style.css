@@ -31,6 +31,10 @@ body {
   margin-bottom: 5;
 }
 
+.record-modal .panel-body dl {
+  margin-bottom: 0;
+}
+
 .record-modal .panel-body p {
   margin-bottom: 0;
 }
@@ -39,4 +43,5 @@ body {
   border: none;
   box-shadow: none;
   -webkit-box-shadow: none;
+  margin-bottom: 0;
 }

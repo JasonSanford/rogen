@@ -279,7 +279,7 @@ Display = (function() {
   }
 
   Display.prototype.generateElementHTML = function(element) {
-    var html_parts, inner_element, inner_element_html, inner_html_parts, panelBody, _i, _len, _ref;
+    var choice_values, html_parts, inner_element, inner_element_html, inner_html_parts, other_values, panelBody, value, _i, _len, _ref, _ref1;
     panelBody = function(panel_html) {
       return "<div class='panel-body'>" + panel_html + "</div>";
     };
@@ -292,12 +292,19 @@ Display = (function() {
         inner_element_html = this.generateElementHTML(inner_element);
         html_parts.push(panelBody(inner_element_html));
       }
-    } else if (element.type === 'YesNoField') {
-      inner_html_parts = ["<p><strong>" + element.label + "</strong>"];
+    } else if ((_ref1 = element.type) === 'YesNoField' || _ref1 === 'ChoiceField') {
+      inner_html_parts = ["<dl><dt>" + element.label + "</dt>"];
       if (this.record.record_geojson.properties[element.key]) {
-        inner_html_parts.push(this.record.record_geojson.properties[element.key]);
+        if (element.type === 'YesNoField') {
+          inner_html_parts.push("<dd>" + this.record.record_geojson.properties[element.key] + "</dd>");
+        } else if (element.type === 'ChoiceField') {
+          choice_values = this.record.record_geojson.properties[element.key].choice_values;
+          other_values = this.record.record_geojson.properties[element.key].other_values;
+          value = choice_values.length ? choice_values[0] : other_values[0];
+          inner_html_parts.push("<dd>" + value + "</dd>");
+        }
       }
-      inner_html_parts.push('</p>');
+      inner_html_parts.push('</dl>');
       html_parts.push(panelBody(inner_html_parts.join('')));
     } else if (element.type === 'TextField') {
       html_parts.push(panelBody("<h4>" + element.label + "</h4><p>" + this.record.record_geojson.properties[element.key] + "</p>"));
