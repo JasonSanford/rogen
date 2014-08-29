@@ -39,3 +39,26 @@ You'll need to set a couple environment variables that allow you to communicate 
 export FULCRUM_API_KEY=super_long_string_that_is_a_secret
 export FULCRUM_FORM_ID=abc-123-def-456
 ```
+
+### Deployment
+
+Blart is easily deployed to Heroku. First create a Heroku app:
+
+```bash
+heroku create
+```
+
+For help with Heroku, [check out the docs](https://devcenter.heroku.com/articles/getting-started-with-nodejs#introduction).
+
+Then, set the envrionment variables from above:
+
+```bash
+heroku config:set FULCRUM_API_KEY=super_long_string_that_is_a_secret
+heroku config:set FULCRUM_FORM_ID=abc-123-def-456
+```
+
+Then, deploy the app:
+
+```bash
+git push heroku master
+```
