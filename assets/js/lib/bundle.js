@@ -49,7 +49,7 @@ module.exports = {
 
 
 
-},{"xhr":12}],3:[function(require,module,exports){
+},{"xhr":13}],3:[function(require,module,exports){
 var Form, Record, RecordCreator, RecordDisplay, async, formAndRecordsCallback, form_utils, getForm, getRecords, map, map_utils, nameApp, record_utils;
 
 async = require('async');
@@ -132,7 +132,7 @@ async.parallel({
 
 
 
-},{"./form":1,"./form_utils":2,"./map_utils":4,"./record":6,"./records/creator":7,"./records/display":8,"./records/utils":9,"async":11}],4:[function(require,module,exports){
+},{"./form":1,"./form_utils":2,"./map_utils":4,"./record":7,"./records/creator":8,"./records/display":9,"./records/utils":10,"async":12}],4:[function(require,module,exports){
 var createGeoJSONLayer, createMap, layer_configs, utils;
 
 layer_configs = require('./layer_configs');
@@ -172,7 +172,7 @@ module.exports = {
 
 
 
-},{"../utils":10,"./layer_configs":5}],5:[function(require,module,exports){
+},{"../utils":11,"./layer_configs":5}],5:[function(require,module,exports){
 var layer_configs;
 
 layer_configs = {
@@ -201,6 +201,31 @@ module.exports = layer_configs;
 
 
 },{}],6:[function(require,module,exports){
+var PhotoDisplay;
+
+PhotoDisplay = (function() {
+  function PhotoDisplay(photo_obj) {
+    this.photo_obj = photo_obj;
+    this.init();
+  }
+
+  PhotoDisplay.prototype.init = function() {
+    return console.log(this.photo_obj);
+  };
+
+  PhotoDisplay.prototype.render = function() {
+    return console.log('Rendering');
+  };
+
+  return PhotoDisplay;
+
+})();
+
+module.exports = PhotoDisplay;
+
+
+
+},{}],7:[function(require,module,exports){
 var Record;
 
 Record = (function() {
@@ -227,7 +252,7 @@ module.exports = Record;
 
 
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 var Creator, map_utils;
 
 map_utils = require('../map_utils');
@@ -267,8 +292,10 @@ module.exports = Creator;
 
 
 
-},{"../map_utils":4}],8:[function(require,module,exports){
-var Display;
+},{"../map_utils":4}],9:[function(require,module,exports){
+var Display, PhotoDisplay;
+
+PhotoDisplay = require('../photo_display');
 
 Display = (function() {
   function Display(form, record) {
@@ -278,31 +305,51 @@ Display = (function() {
     this.init();
   }
 
+  Display.prototype.photo_displays = [];
+
   Display.prototype.generateElementHTML = function(element) {
-    var choice_values, html_parts, inner_element, inner_element_html, inner_html_parts, other_values, panelBody, value, _i, _len, _ref, _ref1;
+    var choice_values, html_parts, inner_element, inner_element_html, inner_html_parts, other_values, panelBody, photo, photos_html_parts, value, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3, _ref4;
     panelBody = function(panel_html) {
       return "<div class='panel-body'>" + panel_html + "</div>";
     };
     html_parts = ['<div class="panel panel-default">'];
-    if (element.type === 'Section') {
+    if ((_ref = element.type) === 'Section' || _ref === 'PhotoField') {
       html_parts.push("<div class='panel-heading'><h3 class='panel-title'>" + element.label + "</h3></div>");
-      _ref = element.elements;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        inner_element = _ref[_i];
-        inner_element_html = this.generateElementHTML(inner_element);
-        html_parts.push(panelBody(inner_element_html));
+      if (element.type === 'Section') {
+        _ref1 = element.elements;
+        for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+          inner_element = _ref1[_i];
+          inner_element_html = this.generateElementHTML(inner_element);
+          html_parts.push(panelBody(inner_element_html));
+        }
+      } else if (element.type === 'PhotoField') {
+        if (this.record.record_geojson.properties[element.key]) {
+          photos_html_parts = [];
+          _ref2 = this.record.record_geojson.properties[element.key];
+          for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+            photo = _ref2[_j];
+            photos_html_parts.push("<div id='photo-" + photo.photo_id + "'></div>");
+            this.photo_displays.push(new PhotoDisplay(photo));
+          }
+          html_parts.push(panelBody(photos_html_parts.join('')));
+        }
       }
-    } else if ((_ref1 = element.type) === 'YesNoField' || _ref1 === 'ChoiceField') {
+    } else if ((_ref3 = element.type) === 'YesNoField' || _ref3 === 'ChoiceField' || _ref3 === 'DateTimeField' || _ref3 === 'TimeField') {
       inner_html_parts = ["<dl><dt>" + element.label + "</dt>"];
       if (this.record.record_geojson.properties[element.key]) {
-        if (element.type === 'YesNoField') {
+        if ((_ref4 = element.type) === 'YesNoField' || _ref4 === 'DateTimeField' || _ref4 === 'TimeField') {
           inner_html_parts.push("<dd>" + this.record.record_geojson.properties[element.key] + "</dd>");
         } else if (element.type === 'ChoiceField') {
           choice_values = this.record.record_geojson.properties[element.key].choice_values;
           other_values = this.record.record_geojson.properties[element.key].other_values;
           value = choice_values.length ? choice_values[0] : other_values[0];
+          if (!value) {
+            value = '&nbsp;';
+          }
           inner_html_parts.push("<dd>" + value + "</dd>");
         }
+      } else {
+        inner_html_parts.push('<dd>&nbsp;</dd>');
       }
       inner_html_parts.push('</dl>');
       html_parts.push(panelBody(inner_html_parts.join('')));
@@ -326,12 +373,20 @@ Display = (function() {
   };
 
   Display.prototype.init = function() {
+    var photo_display, _i, _len, _ref, _results;
     console.log(this.record);
     console.log(this.form);
     this.generateHTMLContent();
     this.$modal_container.find('.modal-title').html(this.record.title());
     this.$modal_container.find('.modal-body').html(this.html_content);
-    return this.$modal_container.modal();
+    this.$modal_container.modal();
+    _ref = this.photo_displays;
+    _results = [];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      photo_display = _ref[_i];
+      _results.push(photo_display.render());
+    }
+    return _results;
   };
 
   return Display;
@@ -342,7 +397,7 @@ module.exports = Display;
 
 
 
-},{}],9:[function(require,module,exports){
+},{"../photo_display":6}],10:[function(require,module,exports){
 var getRecords, xhr;
 
 xhr = require('xhr');
@@ -369,7 +424,7 @@ module.exports = {
 
 
 
-},{"xhr":12}],10:[function(require,module,exports){
+},{"xhr":13}],11:[function(require,module,exports){
 var extend;
 
 extend = function(object, properties) {
@@ -387,7 +442,7 @@ module.exports = {
 
 
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 (function (process){
 /*!
  * async
@@ -1514,7 +1569,7 @@ module.exports = {
 }());
 
 }).call(this,require("UPikzY"))
-},{"UPikzY":19}],12:[function(require,module,exports){
+},{"UPikzY":20}],13:[function(require,module,exports){
 var window = require("global/window")
 var once = require("once")
 var parseHeaders = require('parse-headers')
@@ -1686,7 +1741,7 @@ function createXHR(options, callback) {
 
 function noop() {}
 
-},{"global/window":13,"once":14,"parse-headers":18}],13:[function(require,module,exports){
+},{"global/window":14,"once":15,"parse-headers":19}],14:[function(require,module,exports){
 (function (global){
 if (typeof window !== "undefined") {
     module.exports = window
@@ -1697,7 +1752,7 @@ if (typeof window !== "undefined") {
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 module.exports = once
 
 once.proto = once(function () {
@@ -1718,7 +1773,7 @@ function once (fn) {
   }
 }
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 var isFunction = require('is-function')
 
 module.exports = forEach
@@ -1766,7 +1821,7 @@ function forEachObject(object, iterator, context) {
     }
 }
 
-},{"is-function":16}],16:[function(require,module,exports){
+},{"is-function":17}],17:[function(require,module,exports){
 module.exports = isFunction
 
 var toString = Object.prototype.toString
@@ -1783,7 +1838,7 @@ function isFunction (fn) {
       fn === window.prompt))
 };
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 
 exports = module.exports = trim;
 
@@ -1799,7 +1854,7 @@ exports.right = function(str){
   return str.replace(/\s*$/, '');
 };
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var trim = require('trim')
   , forEach = require('for-each')
 
@@ -1821,7 +1876,7 @@ module.exports = function (headers) {
 
   return result
 }
-},{"for-each":15,"trim":17}],19:[function(require,module,exports){
+},{"for-each":16,"trim":18}],20:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};

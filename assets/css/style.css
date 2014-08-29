@@ -39,9 +39,14 @@ body {
   margin-bottom: 0;
 }
 
+/* Inner panels */
 .record-modal .panel .panel {
   border: none;
   box-shadow: none;
   -webkit-box-shadow: none;
   margin-bottom: 0;
+}
+
+.record-modal .panel .panel .panel-body {
+  padding: 0;
 }
