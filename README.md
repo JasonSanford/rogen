@@ -31,6 +31,12 @@ It's probably best, though, to simply use the dev command to run the seb server 
 npm run dev
 ```
 
+To compile CoffeeScript for deployment, be sure to use the build command, not watch:
+
+```bash
+npm run build
+```
+
 #### Environment Variables
 
 You'll need to set a couple environment variables that allow you to communicate with the Fulcrum API.
