@@ -54,8 +54,6 @@ class Display
     @html_content = parts.join ''
 
   init: ->
-    console.log @record
-    console.log @form
     @generateHTMLContent()
     @$modal_container.find('.modal-title').html @record.title()
     @$modal_container.find('.modal-body').html @html_content

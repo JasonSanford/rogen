@@ -28,6 +28,14 @@ router.get '/records', (req, res) ->
   utils.extend params, req.query
   fulcrum.records.search params, callback
 
+router.get '/photos/:photo_id', (req, res) ->
+  callback = (error, form) ->
+    if error
+      console.log "Error: #{error}"
+      res.send 'Error'
+    res.json form
+  fulcrum.photos.find req.params.photo_id, callback
+
 recordsToFeatureCollection = (records) ->
   feature_collection =
     type         : 'FeatureCollection'

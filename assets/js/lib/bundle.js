@@ -201,20 +201,33 @@ module.exports = layer_configs;
 
 
 },{}],6:[function(require,module,exports){
-var PhotoDisplay;
+var PhotoDisplay, xhr;
+
+xhr = require('xhr');
 
 PhotoDisplay = (function() {
   function PhotoDisplay(photo_obj) {
     this.photo_obj = photo_obj;
-    this.init();
   }
 
-  PhotoDisplay.prototype.init = function() {
-    return console.log(this.photo_obj);
-  };
-
   PhotoDisplay.prototype.render = function() {
-    return console.log('Rendering');
+    var xhr_callback, xhr_options;
+    xhr_options = {
+      uri: "/api/photos/" + this.photo_obj.photo_id,
+      json: true
+    };
+    xhr_callback = (function(_this) {
+      return function(error, response, photo_obj) {
+        var photo_html_parts;
+        if (error) {
+          console.log(error);
+          return;
+        }
+        photo_html_parts = ["<a href='" + photo_obj.photo.large + "' target='_blank'>", "<img src='" + photo_obj.photo.thumbnail + "' />", "</a>"];
+        return $("#photo-" + _this.photo_obj.photo_id).html(photo_html_parts.join(''));
+      };
+    })(this);
+    return xhr(xhr_options, xhr_callback);
   };
 
   return PhotoDisplay;
@@ -225,7 +238,7 @@ module.exports = PhotoDisplay;
 
 
 
-},{}],7:[function(require,module,exports){
+},{"xhr":13}],7:[function(require,module,exports){
 var Record;
 
 Record = (function() {
@@ -374,8 +387,6 @@ Display = (function() {
 
   Display.prototype.init = function() {
     var photo_display, _i, _len, _ref, _results;
-    console.log(this.record);
-    console.log(this.form);
     this.generateHTMLContent();
     this.$modal_container.find('.modal-title').html(this.record.title());
     this.$modal_container.find('.modal-body').html(this.html_content);
