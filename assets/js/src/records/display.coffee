@@ -58,11 +58,26 @@ class Display
       html = panel(html_parts.join '')
     else if element.type is 'TextField'
       if element.numeric
-        html = panel(panelBody("<dl><dt>#{element.label}</dt><dd>#{@record.record_geojson.properties[element.key]}</dd></dl>"))
+        if @record.record_geojson.properties[element.key]
+          value = @record.record_geojson.properties[element.key]
+        else
+          value = '&nbsp;'
+        html = panel(panelBody("<dl><dt>#{element.label}</dt><dd>#{value}</dd></dl>"))
       else
-        html = panel(panelBody("<h4>#{element.label}</h4><p>#{@record.record_geojson.properties[element.key]}</p>"))
+        if @record.record_geojson.properties[element.key]
+          value = @record.record_geojson.properties[element.key]
+        else
+          value = '&nbsp;'
+        html = panel(panelBody("<h4>#{element.label}</h4><p>#{value}</p>"))
     else if element.type is 'Label'
       html = "<div class='alert alert-info'>#{element.label}</div>"
+    else if element.type is 'HyperlinkField'
+      url = if @record.record_geojson.properties[element.key] then @record.record_geojson.properties[element.key] else element.default_url
+      if url
+        link = "<a target='_blank' href='#{url}'>#{url}</a>"
+      else
+        link = '&nbsp;'
+      html = panel(panelBody("<h4>#{element.label}</h4><p>#{link}</p>"))
     html
 
   generateHTMLContent: ->

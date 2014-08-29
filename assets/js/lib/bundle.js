@@ -404,7 +404,7 @@ Display = (function() {
   Display.prototype.photo_displays = [];
 
   Display.prototype.generateElementHTML = function(element) {
-    var choice_values, display, html, html_parts, inner_element, inner_element_html, inner_html_parts, other_values, panel, panelBody, photo, photos_html_parts, values, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
+    var choice_values, display, html, html_parts, inner_element, inner_element_html, inner_html_parts, link, other_values, panel, panelBody, photo, photos_html_parts, url, value, values, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
     panelBody = function(panel_body_html) {
       return "<div class='panel-body'>" + panel_body_html + "</div>";
     };
@@ -472,12 +472,30 @@ Display = (function() {
       html = panel(html_parts.join(''));
     } else if (element.type === 'TextField') {
       if (element.numeric) {
-        html = panel(panelBody("<dl><dt>" + element.label + "</dt><dd>" + this.record.record_geojson.properties[element.key] + "</dd></dl>"));
+        if (this.record.record_geojson.properties[element.key]) {
+          value = this.record.record_geojson.properties[element.key];
+        } else {
+          value = '&nbsp;';
+        }
+        html = panel(panelBody("<dl><dt>" + element.label + "</dt><dd>" + value + "</dd></dl>"));
       } else {
-        html = panel(panelBody("<h4>" + element.label + "</h4><p>" + this.record.record_geojson.properties[element.key] + "</p>"));
+        if (this.record.record_geojson.properties[element.key]) {
+          value = this.record.record_geojson.properties[element.key];
+        } else {
+          value = '&nbsp;';
+        }
+        html = panel(panelBody("<h4>" + element.label + "</h4><p>" + value + "</p>"));
       }
     } else if (element.type === 'Label') {
       html = "<div class='alert alert-info'>" + element.label + "</div>";
+    } else if (element.type === 'HyperlinkField') {
+      url = this.record.record_geojson.properties[element.key] ? this.record.record_geojson.properties[element.key] : element.default_url;
+      if (url) {
+        link = "<a target='_blank' href='" + url + "'>" + url + "</a>";
+      } else {
+        link = '&nbsp;';
+      }
+      html = panel(panelBody("<h4>" + element.label + "</h4><p>" + link + "</p>"));
     }
     return html;
   };
