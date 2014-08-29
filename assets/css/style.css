@@ -39,6 +39,15 @@ body {
   margin-bottom: 0;
 }
 
+.record-modal .panel-body .alert {
+  margin-bottom: 0;
+  padding: 5px 10px;
+}
+
+.record-modal .panel-body .alert.yesno {
+  display: inline-block;
+}
+
 .record-modal .photo-row {
   margin-left: 0;
   margin-right: 0;

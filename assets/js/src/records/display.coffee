@@ -36,7 +36,31 @@ class Display
       inner_html_parts = ["<dl><dt>#{element.label}</dt>"]
       if @record.record_geojson.properties[element.key]
         if element.type in ['YesNoField', 'DateTimeField', 'TimeField']
-          inner_html_parts.push "<dd>#{@record.record_geojson.properties[element.key]}</dd>"
+          if element.type is 'YesNoField'
+            value = @record.record_geojson.properties[element.key]
+            if value
+              if value is element.positive.value
+                pos_neg_neu = 'positive'
+                alert_klass = 'success'
+                glyphicon   = 'thumbs-up'
+              else if value is element.negative.value
+                pos_neg_neu = 'negative'
+                alert_klass = 'danger'
+                glyphicon   = 'thumbs-down'
+              else
+                pos_neg_neu = 'neutral'
+                alert_klass = 'warning'
+                glyphicon   = 'adjust'
+              label = element[pos_neg_neu].label
+              value = "<div class='alert alert-#{alert_klass} yesno'><i class='glyphicon glyphicon-#{glyphicon}' /> <strong>#{label}</strong></div>"
+            else
+              value = '&nbsp;'
+          else
+            if @record.record_geojson.properties[element.key]
+              value = @record.record_geojson.properties[element.key]
+            else
+              value = '&nbsp;'
+          inner_html_parts.push "<dd>#{value}</dd>"
         else if element.type in ['ChoiceField', 'ClassificationField']
           choice_values = @record.record_geojson.properties[element.key].choice_values
           other_values  = @record.record_geojson.properties[element.key].other_values

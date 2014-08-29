@@ -404,7 +404,7 @@ Display = (function() {
   Display.prototype.photo_displays = [];
 
   Display.prototype.generateElementHTML = function(element) {
-    var choice_values, display, html, html_parts, inner_element, inner_element_html, inner_html_parts, link, other_values, panel, panelBody, photo, photos_html_parts, url, value, values, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
+    var alert_klass, choice_values, display, glyphicon, html, html_parts, inner_element, inner_element_html, inner_html_parts, label, link, other_values, panel, panelBody, photo, photos_html_parts, pos_neg_neu, url, value, values, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
     panelBody = function(panel_body_html) {
       return "<div class='panel-body'>" + panel_body_html + "</div>";
     };
@@ -440,7 +440,35 @@ Display = (function() {
       inner_html_parts = ["<dl><dt>" + element.label + "</dt>"];
       if (this.record.record_geojson.properties[element.key]) {
         if ((_ref4 = element.type) === 'YesNoField' || _ref4 === 'DateTimeField' || _ref4 === 'TimeField') {
-          inner_html_parts.push("<dd>" + this.record.record_geojson.properties[element.key] + "</dd>");
+          if (element.type === 'YesNoField') {
+            value = this.record.record_geojson.properties[element.key];
+            if (value) {
+              if (value === element.positive.value) {
+                pos_neg_neu = 'positive';
+                alert_klass = 'success';
+                glyphicon = 'thumbs-up';
+              } else if (value === element.negative.value) {
+                pos_neg_neu = 'negative';
+                alert_klass = 'danger';
+                glyphicon = 'thumbs-down';
+              } else {
+                pos_neg_neu = 'neutral';
+                alert_klass = 'warning';
+                glyphicon = 'adjust';
+              }
+              label = element[pos_neg_neu].label;
+              value = "<div class='alert alert-" + alert_klass + " yesno'><i class='glyphicon glyphicon-" + glyphicon + "' /> <strong>" + label + "</strong></div>";
+            } else {
+              value = '&nbsp;';
+            }
+          } else {
+            if (this.record.record_geojson.properties[element.key]) {
+              value = this.record.record_geojson.properties[element.key];
+            } else {
+              value = '&nbsp;';
+            }
+          }
+          inner_html_parts.push("<dd>" + value + "</dd>");
         } else if ((_ref5 = element.type) === 'ChoiceField' || _ref5 === 'ClassificationField') {
           choice_values = this.record.record_geojson.properties[element.key].choice_values;
           other_values = this.record.record_geojson.properties[element.key].other_values;
