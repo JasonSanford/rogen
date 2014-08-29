@@ -57,8 +57,10 @@ class Display
       html_parts.push panelBody(inner_html_parts.join '')
       html = panel(html_parts.join '')
     else if element.type is 'TextField'
-      html_parts.push panelBody("<h4>#{element.label}</h4><p>#{@record.record_geojson.properties[element.key]}</p>")
-      html = panel(html_parts.join '')
+      if element.numeric
+        html = panel(panelBody("<dl><dt>#{element.label}</dt><dd>#{@record.record_geojson.properties[element.key]}</dd></dl>"))
+      else
+        html = panel(panelBody("<h4>#{element.label}</h4><p>#{@record.record_geojson.properties[element.key]}</p>"))
     else if element.type is 'Label'
       html = "<div class='alert alert-info'>#{element.label}</div>"
     html

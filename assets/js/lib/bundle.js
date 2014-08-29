@@ -471,8 +471,11 @@ Display = (function() {
       html_parts.push(panelBody(inner_html_parts.join('')));
       html = panel(html_parts.join(''));
     } else if (element.type === 'TextField') {
-      html_parts.push(panelBody("<h4>" + element.label + "</h4><p>" + this.record.record_geojson.properties[element.key] + "</p>"));
-      html = panel(html_parts.join(''));
+      if (element.numeric) {
+        html = panel(panelBody("<dl><dt>" + element.label + "</dt><dd>" + this.record.record_geojson.properties[element.key] + "</dd></dl>"));
+      } else {
+        html = panel(panelBody("<h4>" + element.label + "</h4><p>" + this.record.record_geojson.properties[element.key] + "</p>"));
+      }
     } else if (element.type === 'Label') {
       html = "<div class='alert alert-info'>" + element.label + "</div>";
     }
