@@ -30,3 +30,12 @@ It's probably best, though, to simply use the dev command to run the seb server 
 ```
 npm run dev
 ```
+
+#### Environment Variables
+
+You'll need to set a couple environment variables that allow you to communicate with the Fulcrum API.
+
+```bash
+export FULCRUM_API_KEY=super_long_string_that_is_a_secret
+export FULCRUM_FORM_ID=abc-123-def-456
+```
