@@ -8,6 +8,7 @@ class Display
   photo_displays: []
 
   # TODO: This shit is NASTY, make not nasty.
+  # Probably want to render each field type in its own method: @_renderYesNoField(element)
   generateElementHTML: (element) ->
     panelBody = (panel_body_html) ->
       "<div class='panel-body'>#{panel_body_html}</div>"
