@@ -39,6 +39,16 @@ body {
   margin-bottom: 0;
 }
 
+.record-modal .photo-row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.record-modal .photo-row .thumbnail {
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
+
 /* Inner panels */
 .record-modal .panel .panel {
   border: none;

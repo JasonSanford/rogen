@@ -21,10 +21,11 @@ class Display
           html_parts.push panelBody(inner_element_html)
       else if element.type is 'PhotoField'
         if @record.record_geojson.properties[element.key]
-          photos_html_parts = []
+          photos_html_parts = ['<div class="row photo-row">']
           for photo in @record.record_geojson.properties[element.key]
-            photos_html_parts.push "<div id='photo-#{photo.photo_id}'></div>"
+            photos_html_parts.push "<div class='thumbnail col-xs-6 col-md-3' id='photo-#{photo.photo_id}'></div>"
             @photo_displays.push new PhotoDisplay(photo)
+          photos_html_parts.push '</div>'
           html_parts.push panelBody(photos_html_parts.join '')
     else if element.type in ['YesNoField', 'ChoiceField', 'DateTimeField', 'TimeField']
       inner_html_parts = ["<dl><dt>#{element.label}</dt>"]

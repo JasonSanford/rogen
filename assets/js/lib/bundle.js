@@ -337,13 +337,14 @@ Display = (function() {
         }
       } else if (element.type === 'PhotoField') {
         if (this.record.record_geojson.properties[element.key]) {
-          photos_html_parts = [];
+          photos_html_parts = ['<div class="row photo-row">'];
           _ref2 = this.record.record_geojson.properties[element.key];
           for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
             photo = _ref2[_j];
-            photos_html_parts.push("<div id='photo-" + photo.photo_id + "'></div>");
+            photos_html_parts.push("<div class='thumbnail col-xs-6 col-md-3' id='photo-" + photo.photo_id + "'></div>");
             this.photo_displays.push(new PhotoDisplay(photo));
           }
+          photos_html_parts.push('</div>');
           html_parts.push(panelBody(photos_html_parts.join('')));
         }
       }
