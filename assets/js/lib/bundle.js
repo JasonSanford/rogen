@@ -389,9 +389,17 @@ module.exports = Creator;
 
 
 },{"../map_utils":5}],10:[function(require,module,exports){
-var Display, PhotoDisplay;
+var Display, PhotoDisplay, panel, panelBody;
 
 PhotoDisplay = require('../photo_display');
+
+panelBody = function(panel_body_html) {
+  return "<div class='panel-body'>" + panel_body_html + "</div>";
+};
+
+panel = function(panel_html) {
+  return "<div class='panel panel-default'>" + panel_html + "</div>";
+};
 
 Display = (function() {
   function Display(form, record) {
@@ -403,139 +411,169 @@ Display = (function() {
 
   Display.prototype.photo_displays = [];
 
-  Display.prototype.generateElementHTML = function(element) {
-    var alert_klass, choice_values, display, glyphicon, html, html_parts, inner_element, inner_element_html, inner_html_parts, label, link, other_values, panel, panelBody, photo, photos_html_parts, pos_neg_neu, url, value, values, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
-    panelBody = function(panel_body_html) {
-      return "<div class='panel-body'>" + panel_body_html + "</div>";
-    };
-    panel = function(panel_html) {
-      return "<div class='panel panel-default'>" + panel_html + "</div>";
-    };
+  Display.prototype.generateChoiceField = function(element) {
+    var choice_values, display, other_values, values;
+    if (choice_values = this.record.record_geojson.properties[element.key]) {
+      choice_values = this.record.record_geojson.properties[element.key].choice_values;
+      other_values = this.record.record_geojson.properties[element.key].other_values;
+      if (element.multiple) {
+        values = choice_values.concat(other_values);
+      } else {
+        values = [choice_values.length ? choice_values[0] : other_values[0]];
+      }
+      display = values.join(', ');
+      if (!display) {
+        display = '%nbsp;';
+      }
+    } else {
+      display = '&nbsp;';
+    }
+    return panel(panelBody("<dl><dt>" + element.label + "</dt><dd>" + display + "</dd></dl>"));
+  };
+
+  Display.prototype.generateClassificationField = function(element) {
+    var choice_values, display, other_values, values;
+    if (choice_values = this.record.record_geojson.properties[element.key]) {
+      choice_values = this.record.record_geojson.properties[element.key].choice_values;
+      other_values = this.record.record_geojson.properties[element.key].other_values;
+      if (element.multiple) {
+        values = choice_values.concat(other_values);
+      } else {
+        values = [choice_values.length ? choice_values[0] : other_values[0]];
+      }
+      values = values.map((function(_this) {
+        return function(value) {
+          return _this.form.classification_sets[element.classification_set_id].getValueByID(value);
+        };
+      })(this));
+      display = values.join(', ');
+      if (!display) {
+        display = '%nbsp;';
+      }
+    } else {
+      display = '&nbsp;';
+    }
+    return panel(panelBody("<dl><dt>" + element.label + "</dt><dd>" + display + "</dd></dl>"));
+  };
+
+  Display.prototype.generateDateTimeField = function(element) {
+    return this.generateTimeFieldAndDateTimeField(element);
+  };
+
+  Display.prototype.generateTimeField = function(element) {
+    return this.generateTimeFieldAndDateTimeField(element);
+  };
+
+  Display.prototype.generateTimeFieldAndDateTimeField = function(element) {
+    var value;
+    value = this.record.record_geojson.properties[element.key];
+    if (!value) {
+      value = '%nbsp;';
+    }
+    return panel(panelBody("<dl><dt>" + element.label + "</dt><dd>" + value + "</dd></dl>"));
+  };
+
+  Display.prototype.generateHyperlinkField = function(element) {
+    var link, url;
+    url = this.record.record_geojson.properties[element.key] ? this.record.record_geojson.properties[element.key] : element.default_url;
+    if (url) {
+      link = "<a target='_blank' href='" + url + "'>" + url + "</a>";
+    } else {
+      link = '&nbsp;';
+    }
+    return panel(panelBody("<h4>" + element.label + "</h4><p>" + link + "</p>"));
+  };
+
+  Display.prototype.generateLabel = function(element) {
+    return "<div class='alert alert-info'>" + element.label + "</div>";
+  };
+
+  Display.prototype.generatePhotoField = function(element) {
+    var photo, photos_html_parts, _i, _len, _ref;
+    photos_html_parts = [];
+    if (this.record.record_geojson.properties[element.key]) {
+      photos_html_parts.push('<div class="row photo-row">');
+      _ref = this.record.record_geojson.properties[element.key];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        photo = _ref[_i];
+        photos_html_parts.push("<div class='thumbnail col-xs-6 col-md-3' id='photo-" + photo.photo_id + "'></div>");
+        this.photo_displays.push(new PhotoDisplay(photo));
+      }
+      photos_html_parts.push('</div>');
+    }
+    return panel("<div class='panel-heading'><h3 class='panel-title'>" + element.label + "</h3></div>" + (panelBody(photos_html_parts.join(''))));
+  };
+
+  Display.prototype.generateTextField = function(element) {
+    var value;
+    if (this.record.record_geojson.properties[element.key]) {
+      value = this.record.record_geojson.properties[element.key];
+    } else {
+      value = '&nbsp;';
+    }
+    if (element.numeric) {
+      return panel(panelBody("<dl><dt>" + element.label + "</dt><dd>" + value + "</dd></dl>"));
+    } else {
+      return panel(panelBody("<h4>" + element.label + "</h4><p>" + value + "</p>"));
+    }
+  };
+
+  Display.prototype.generateYesNoField = function(element) {
+    var alert_klass, glyphicon, label, pos_neg_neu, value;
+    value = this.record.record_geojson.properties[element.key];
+    if (value) {
+      if (value === element.positive.value) {
+        pos_neg_neu = 'positive';
+        alert_klass = 'success';
+        glyphicon = 'thumbs-up';
+      } else if (value === element.negative.value) {
+        pos_neg_neu = 'negative';
+        alert_klass = 'danger';
+        glyphicon = 'thumbs-down';
+      } else {
+        pos_neg_neu = 'neutral';
+        alert_klass = 'warning';
+        glyphicon = 'adjust';
+      }
+      label = element[pos_neg_neu].label;
+      value = "<div class='alert alert-" + alert_klass + " yesno'><i class='glyphicon glyphicon-" + glyphicon + "' /> <strong>" + label + "</strong></div>";
+    } else {
+      value = '&nbsp;';
+    }
+    return panel(panelBody("<dl><dt>" + element.label + "</dt><dd>" + value + "</dd></dl>"));
+  };
+
+  Display.prototype.generateSection = function(element) {
+    var html, html_parts, inner_element, inner_element_html, _i, _len, _ref;
     html_parts = [];
-    if ((_ref = element.type) === 'Section' || _ref === 'PhotoField') {
-      html_parts.push("<div class='panel-heading'><h3 class='panel-title'>" + element.label + "</h3></div>");
-      if (element.type === 'Section') {
-        _ref1 = element.elements;
-        for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-          inner_element = _ref1[_i];
-          inner_element_html = this.generateElementHTML(inner_element);
-          html_parts.push(panelBody(inner_element_html));
-          html = panel(html_parts.join(''));
-        }
-      } else if (element.type === 'PhotoField') {
-        if (this.record.record_geojson.properties[element.key]) {
-          photos_html_parts = ['<div class="row photo-row">'];
-          _ref2 = this.record.record_geojson.properties[element.key];
-          for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-            photo = _ref2[_j];
-            photos_html_parts.push("<div class='thumbnail col-xs-6 col-md-3' id='photo-" + photo.photo_id + "'></div>");
-            this.photo_displays.push(new PhotoDisplay(photo));
-          }
-          photos_html_parts.push('</div>');
-          html_parts.push(panelBody(photos_html_parts.join('')));
-          html = panel(html_parts.join(''));
-        }
-      }
-    } else if ((_ref3 = element.type) === 'YesNoField' || _ref3 === 'ChoiceField' || _ref3 === 'ClassificationField' || _ref3 === 'DateTimeField' || _ref3 === 'TimeField') {
-      inner_html_parts = ["<dl><dt>" + element.label + "</dt>"];
-      if (this.record.record_geojson.properties[element.key]) {
-        if ((_ref4 = element.type) === 'YesNoField' || _ref4 === 'DateTimeField' || _ref4 === 'TimeField') {
-          if (element.type === 'YesNoField') {
-            value = this.record.record_geojson.properties[element.key];
-            if (value) {
-              if (value === element.positive.value) {
-                pos_neg_neu = 'positive';
-                alert_klass = 'success';
-                glyphicon = 'thumbs-up';
-              } else if (value === element.negative.value) {
-                pos_neg_neu = 'negative';
-                alert_klass = 'danger';
-                glyphicon = 'thumbs-down';
-              } else {
-                pos_neg_neu = 'neutral';
-                alert_klass = 'warning';
-                glyphicon = 'adjust';
-              }
-              label = element[pos_neg_neu].label;
-              value = "<div class='alert alert-" + alert_klass + " yesno'><i class='glyphicon glyphicon-" + glyphicon + "' /> <strong>" + label + "</strong></div>";
-            } else {
-              value = '&nbsp;';
-            }
-          } else {
-            if (this.record.record_geojson.properties[element.key]) {
-              value = this.record.record_geojson.properties[element.key];
-            } else {
-              value = '&nbsp;';
-            }
-          }
-          inner_html_parts.push("<dd>" + value + "</dd>");
-        } else if ((_ref5 = element.type) === 'ChoiceField' || _ref5 === 'ClassificationField') {
-          choice_values = this.record.record_geojson.properties[element.key].choice_values;
-          other_values = this.record.record_geojson.properties[element.key].other_values;
-          if (element.multiple) {
-            values = choice_values.concat(other_values);
-          } else {
-            values = [choice_values.length ? choice_values[0] : other_values[0]];
-          }
-          if (element.type === 'ClassificationField') {
-            values = values.map((function(_this) {
-              return function(value) {
-                return _this.form.classification_sets[element.classification_set_id].getValueByID(value);
-              };
-            })(this));
-            display = values.join(', ');
-          } else {
-            display = values.join(', ');
-          }
-          if (!display) {
-            display = '%nbsp;';
-          }
-          inner_html_parts.push("<dd>" + display + "</dd>");
-        }
-      } else {
-        inner_html_parts.push('<dd>&nbsp;</dd>');
-      }
-      inner_html_parts.push('</dl>');
-      html_parts.push(panelBody(inner_html_parts.join('')));
+    _ref = element.elements;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      inner_element = _ref[_i];
+      inner_element_html = this.generateElement(inner_element);
+      html_parts.push(panelBody(inner_element_html));
       html = panel(html_parts.join(''));
-    } else if (element.type === 'TextField') {
-      if (element.numeric) {
-        if (this.record.record_geojson.properties[element.key]) {
-          value = this.record.record_geojson.properties[element.key];
-        } else {
-          value = '&nbsp;';
-        }
-        html = panel(panelBody("<dl><dt>" + element.label + "</dt><dd>" + value + "</dd></dl>"));
-      } else {
-        if (this.record.record_geojson.properties[element.key]) {
-          value = this.record.record_geojson.properties[element.key];
-        } else {
-          value = '&nbsp;';
-        }
-        html = panel(panelBody("<h4>" + element.label + "</h4><p>" + value + "</p>"));
-      }
-    } else if (element.type === 'Label') {
-      html = "<div class='alert alert-info'>" + element.label + "</div>";
-    } else if (element.type === 'HyperlinkField') {
-      url = this.record.record_geojson.properties[element.key] ? this.record.record_geojson.properties[element.key] : element.default_url;
-      if (url) {
-        link = "<a target='_blank' href='" + url + "'>" + url + "</a>";
-      } else {
-        link = '&nbsp;';
-      }
-      html = panel(panelBody("<h4>" + element.label + "</h4><p>" + link + "</p>"));
+    }
+    return panel("<div class='panel-heading'><h3 class='panel-title'>" + element.label + "</h3></div>" + (panelBody(html)));
+  };
+
+  Display.prototype.generateElement = function(element) {
+    var html;
+    if (this["generate" + element.type]) {
+      html = this["generate" + element.type](element);
+    } else {
+      console.log("Could not render element " + element.type);
+      html = '';
     }
     return html;
   };
 
   Display.prototype.generateHTMLContent = function() {
-    var element, html_part, parts, _i, _len, _ref;
+    var element, parts, _i, _len, _ref;
     parts = [];
     _ref = this.form.form_obj.elements;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       element = _ref[_i];
-      html_part = this.generateElementHTML(element);
-      parts.push(html_part);
+      parts.push(this.generateElement(element));
     }
     return this.html_content = parts.join('');
   };
