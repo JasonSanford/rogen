@@ -133,7 +133,7 @@ module.exports = {
 
 
 },{"xhr":14}],4:[function(require,module,exports){
-var Form, Record, RecordCreator, RecordDisplay, async, formAndRecordsCallback, form_utils, getForm, getRecords, map, map_utils, nameApp, record_utils;
+var Form, Record, RecordCreator, RecordViewer, async, formAndRecordsCallback, form_utils, getForm, getRecords, map, map_utils, nameApp, record_utils;
 
 async = require('async');
 
@@ -147,7 +147,7 @@ form_utils = require('./form_utils');
 
 record_utils = require('./records/utils');
 
-RecordDisplay = require('./records/display');
+RecordViewer = require('./records/viewer');
 
 RecordCreator = require('./records/creator');
 
@@ -193,7 +193,7 @@ formAndRecordsCallback = function(error, results) {
       return layer.on('click', function() {
         var record, record_display;
         record = new Record(feature, form);
-        return record_display = new RecordDisplay(form, record);
+        return record_display = new RecordViewer(form, record);
       });
     }
   };
@@ -215,7 +215,7 @@ async.parallel({
 
 
 
-},{"./form":2,"./form_utils":3,"./map_utils":5,"./record":8,"./records/creator":9,"./records/display":10,"./records/utils":11,"async":13}],5:[function(require,module,exports){
+},{"./form":2,"./form_utils":3,"./map_utils":5,"./record":8,"./records/creator":9,"./records/utils":10,"./records/viewer":11,"async":13}],5:[function(require,module,exports){
 var createGeoJSONLayer, createMap, layer_configs, utils;
 
 layer_configs = require('./layer_configs');
@@ -389,6 +389,33 @@ module.exports = Creator;
 
 
 },{"../map_utils":5}],10:[function(require,module,exports){
+var getRecords, xhr;
+
+xhr = require('xhr');
+
+getRecords = function(cb) {
+  var xhr_callback, xhr_options;
+  xhr_options = {
+    uri: '/api/records',
+    json: true
+  };
+  xhr_callback = function(error, response, records) {
+    if (error) {
+      return cb(error, null);
+    } else {
+      return cb(null, records);
+    }
+  };
+  return xhr(xhr_options, xhr_callback);
+};
+
+module.exports = {
+  getRecords: getRecords
+};
+
+
+
+},{"xhr":14}],11:[function(require,module,exports){
 var Display, PhotoDisplay, panel, panelBody;
 
 PhotoDisplay = require('../photo_display');
@@ -601,34 +628,7 @@ module.exports = Display;
 
 
 
-},{"../photo_display":7}],11:[function(require,module,exports){
-var getRecords, xhr;
-
-xhr = require('xhr');
-
-getRecords = function(cb) {
-  var xhr_callback, xhr_options;
-  xhr_options = {
-    uri: '/api/records',
-    json: true
-  };
-  xhr_callback = function(error, response, records) {
-    if (error) {
-      return cb(error, null);
-    } else {
-      return cb(null, records);
-    }
-  };
-  return xhr(xhr_options, xhr_callback);
-};
-
-module.exports = {
-  getRecords: getRecords
-};
-
-
-
-},{"xhr":14}],12:[function(require,module,exports){
+},{"../photo_display":7}],12:[function(require,module,exports){
 var extend;
 
 extend = function(object, properties) {

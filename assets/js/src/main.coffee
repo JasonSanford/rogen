@@ -5,7 +5,7 @@ Record        = require './record'
 map_utils     = require './map_utils'
 form_utils    = require './form_utils'
 record_utils  = require './records/utils'
-RecordDisplay = require './records/display'
+RecordViewer  = require './records/viewer'
 RecordCreator = require './records/creator'
 
 map = map_utils.createMap 'map-container'
@@ -44,7 +44,7 @@ formAndRecordsCallback = (error, results) ->
     onEachFeature: (feature, layer) ->
       layer.on 'click', ->
         record = new Record feature, form
-        record_display = new RecordDisplay form, record
+        record_display = new RecordViewer form, record
   features_layer = map_utils.createGeoJSONLayer geojson_layer_options
 
   map.addLayer features_layer

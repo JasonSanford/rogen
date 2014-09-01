@@ -6,7 +6,7 @@ panelBody = (panel_body_html) ->
 panel = (panel_html) ->
   "<div class='panel panel-default'>#{panel_html}</div>"
 
-class Display
+class Viewer
   constructor: (@form, @record) ->
     @$modal_container = $('#record-modal')
     @init()
@@ -135,4 +135,4 @@ class Display
     for photo_display in @photo_displays
       photo_display.render()
 
-module.exports = Display
+module.exports = Viewer
