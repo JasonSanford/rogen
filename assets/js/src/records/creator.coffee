@@ -9,6 +9,10 @@ class Creator
   createMap: ->
     @map = map_utils.createMap @$map_container[0], {zoomControl: false}
 
+    locate_control = L.control.locate({follow: true, stopFollowingOnDrag: true})
+    locate_control.addTo @map
+    locate_control.locate()
+
   initEvents: ->
     @$modal_container.on 'shown.bs.modal', (event) =>
       # We need to make sure animations are finished before creating the map

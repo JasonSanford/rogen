@@ -223,7 +223,11 @@ layer_configs = require('./layer_configs');
 utils = require('../utils');
 
 createMap = function(div_id, options) {
-  var base_layers, map, map_options, satellite_layer, streets_layer;
+  var base_layers, layersControl, map, map_options, satellite_layer, streets_layer;
+  if (options && 'layersControl' in options) {
+    layersControl = options.layersControl;
+    delete options.layersControl;
+  }
   map_options = {
     center: [0, 0],
     zoom: 4,
@@ -234,11 +238,13 @@ createMap = function(div_id, options) {
   streets_layer = new L.TileLayer(layer_configs.mapbox_streets.url, layer_configs.mapbox_streets.options);
   satellite_layer = new L.TileLayer(layer_configs.mapbox_satellite.url, layer_configs.mapbox_satellite.options);
   map.addLayer(streets_layer);
-  base_layers = {
-    'Street': streets_layer,
-    'Satellite': satellite_layer
-  };
-  L.control.layers(base_layers, null).addTo(map);
+  if (layersControl === void 0 || layersControl) {
+    base_layers = {
+      'Street': streets_layer,
+      'Satellite': satellite_layer
+    };
+    L.control.layers(base_layers, null).addTo(map);
+  }
   return map;
 };
 
@@ -362,9 +368,16 @@ Creator = (function() {
   }
 
   Creator.prototype.createMap = function() {
-    return this.map = map_utils.createMap(this.$map_container[0], {
+    var locate_control;
+    this.map = map_utils.createMap(this.$map_container[0], {
       zoomControl: false
     });
+    locate_control = L.control.locate({
+      follow: true,
+      stopFollowingOnDrag: true
+    });
+    locate_control.addTo(this.map);
+    return locate_control.locate();
   };
 
   Creator.prototype.initEvents = function() {
@@ -416,7 +429,7 @@ module.exports = {
 
 
 },{"xhr":14}],11:[function(require,module,exports){
-var Display, PhotoDisplay, panel, panelBody;
+var PhotoDisplay, Viewer, panel, panelBody;
 
 PhotoDisplay = require('../photo_display');
 
@@ -428,17 +441,17 @@ panel = function(panel_html) {
   return "<div class='panel panel-default'>" + panel_html + "</div>";
 };
 
-Display = (function() {
-  function Display(form, record) {
+Viewer = (function() {
+  function Viewer(form, record) {
     this.form = form;
     this.record = record;
     this.$modal_container = $('#record-modal');
     this.init();
   }
 
-  Display.prototype.photo_displays = [];
+  Viewer.prototype.photo_displays = [];
 
-  Display.prototype.generateChoiceField = function(element) {
+  Viewer.prototype.generateChoiceField = function(element) {
     var choice_values, display, other_values, values;
     if (choice_values = this.record.record_geojson.properties[element.key]) {
       choice_values = this.record.record_geojson.properties[element.key].choice_values;
@@ -458,7 +471,7 @@ Display = (function() {
     return panel(panelBody("<dl><dt>" + element.label + "</dt><dd>" + display + "</dd></dl>"));
   };
 
-  Display.prototype.generateClassificationField = function(element) {
+  Viewer.prototype.generateClassificationField = function(element) {
     var choice_values, display, other_values, values;
     if (choice_values = this.record.record_geojson.properties[element.key]) {
       choice_values = this.record.record_geojson.properties[element.key].choice_values;
@@ -483,15 +496,15 @@ Display = (function() {
     return panel(panelBody("<dl><dt>" + element.label + "</dt><dd>" + display + "</dd></dl>"));
   };
 
-  Display.prototype.generateDateTimeField = function(element) {
+  Viewer.prototype.generateDateTimeField = function(element) {
     return this.generateTimeFieldAndDateTimeField(element);
   };
 
-  Display.prototype.generateTimeField = function(element) {
+  Viewer.prototype.generateTimeField = function(element) {
     return this.generateTimeFieldAndDateTimeField(element);
   };
 
-  Display.prototype.generateTimeFieldAndDateTimeField = function(element) {
+  Viewer.prototype.generateTimeFieldAndDateTimeField = function(element) {
     var value;
     value = this.record.record_geojson.properties[element.key];
     if (!value) {
@@ -500,7 +513,7 @@ Display = (function() {
     return panel(panelBody("<dl><dt>" + element.label + "</dt><dd>" + value + "</dd></dl>"));
   };
 
-  Display.prototype.generateHyperlinkField = function(element) {
+  Viewer.prototype.generateHyperlinkField = function(element) {
     var link, url;
     url = this.record.record_geojson.properties[element.key] ? this.record.record_geojson.properties[element.key] : element.default_url;
     if (url) {
@@ -511,11 +524,11 @@ Display = (function() {
     return panel(panelBody("<h4>" + element.label + "</h4><p>" + link + "</p>"));
   };
 
-  Display.prototype.generateLabel = function(element) {
+  Viewer.prototype.generateLabel = function(element) {
     return "<div class='alert alert-info'>" + element.label + "</div>";
   };
 
-  Display.prototype.generatePhotoField = function(element) {
+  Viewer.prototype.generatePhotoField = function(element) {
     var photo, photos_html_parts, _i, _len, _ref;
     photos_html_parts = [];
     if (this.record.record_geojson.properties[element.key]) {
@@ -531,7 +544,7 @@ Display = (function() {
     return panel("<div class='panel-heading'><h3 class='panel-title'>" + element.label + "</h3></div>" + (panelBody(photos_html_parts.join(''))));
   };
 
-  Display.prototype.generateTextField = function(element) {
+  Viewer.prototype.generateTextField = function(element) {
     var value;
     if (this.record.record_geojson.properties[element.key]) {
       value = this.record.record_geojson.properties[element.key];
@@ -545,7 +558,7 @@ Display = (function() {
     }
   };
 
-  Display.prototype.generateYesNoField = function(element) {
+  Viewer.prototype.generateYesNoField = function(element) {
     var alert_klass, glyphicon, label, pos_neg_neu, value;
     value = this.record.record_geojson.properties[element.key];
     if (value) {
@@ -570,7 +583,7 @@ Display = (function() {
     return panel(panelBody("<dl><dt>" + element.label + "</dt><dd>" + value + "</dd></dl>"));
   };
 
-  Display.prototype.generateSection = function(element) {
+  Viewer.prototype.generateSection = function(element) {
     var html, html_parts, inner_element, inner_element_html, _i, _len, _ref;
     html_parts = [];
     _ref = element.elements;
@@ -583,7 +596,7 @@ Display = (function() {
     return panel("<div class='panel-heading'><h3 class='panel-title'>" + element.label + "</h3></div>" + (panelBody(html)));
   };
 
-  Display.prototype.generateElement = function(element) {
+  Viewer.prototype.generateElement = function(element) {
     var html;
     if (this["generate" + element.type]) {
       html = this["generate" + element.type](element);
@@ -594,7 +607,7 @@ Display = (function() {
     return html;
   };
 
-  Display.prototype.generateHTMLContent = function() {
+  Viewer.prototype.generateHTMLContent = function() {
     var element, parts, _i, _len, _ref;
     parts = [];
     _ref = this.form.form_obj.elements;
@@ -605,7 +618,7 @@ Display = (function() {
     return this.html_content = parts.join('');
   };
 
-  Display.prototype.init = function() {
+  Viewer.prototype.init = function() {
     var photo_display, _i, _len, _ref, _results;
     this.generateHTMLContent();
     this.$modal_container.find('.modal-title').html(this.record.title());
@@ -620,11 +633,11 @@ Display = (function() {
     return _results;
   };
 
-  return Display;
+  return Viewer;
 
 })();
 
-module.exports = Display;
+module.exports = Viewer;
 
 
 

@@ -2,6 +2,9 @@ layer_configs = require './layer_configs'
 utils         = require '../utils'
 
 createMap = (div_id, options) ->
+  if options and 'layersControl' of options
+    layersControl = options.layersControl
+    delete options.layersControl
   map_options =
     center             : [0, 0]
     zoom               : 4
@@ -14,10 +17,11 @@ createMap = (div_id, options) ->
   
   map.addLayer streets_layer
 
-  base_layers =
-    'Street'    : streets_layer,
-    'Satellite' : satellite_layer
-  L.control.layers(base_layers, null).addTo map
+  if layersControl is undefined or layersControl
+    base_layers =
+      'Street'    : streets_layer,
+      'Satellite' : satellite_layer
+    L.control.layers(base_layers, null).addTo map
   map
 
 createGeoJSONLayer = (geojson_options) ->
