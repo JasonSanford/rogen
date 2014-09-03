@@ -471,7 +471,9 @@ Creator = (function() {
   };
 
   Creator.prototype.generateTextField = function(element) {
-    return panel(panelBody(formGroup("<label>" + element.label + "</label><input type='text' class='form-control' data-fulcrum-field-type='" + element.type + "' id='" + element.key + "' name='" + element.key + "'>")));
+    var input_type;
+    input_type = element.numeric ? 'number' : 'text';
+    return panel(panelBody(formGroup("<label>" + element.label + "</label><input type='" + input_type + "' class='form-control' data-fulcrum-field-type='" + element.type + "' id='" + element.key + "' name='" + element.key + "'>")));
   };
 
   Creator.prototype.generateDateTimeField = function(element) {
