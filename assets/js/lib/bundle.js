@@ -355,15 +355,36 @@ module.exports = Record;
 
 
 },{}],9:[function(require,module,exports){
-var Creator, map_utils;
+var Creator, form, formGroup, map_utils, panel, panelBody, xhr,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+xhr = require('xhr');
 
 map_utils = require('../map_utils');
+
+panelBody = function(panel_body_html) {
+  return "<div class='panel-body'>" + panel_body_html + "</div>";
+};
+
+panel = function(panel_html) {
+  return "<div class='panel panel-default'>" + panel_html + "</div>";
+};
+
+form = function(form_html) {
+  return "";
+};
+
+formGroup = function(form_group_html) {
+  return "<div class='form-group'>" + form_group_html + "</div>";
+};
 
 Creator = (function() {
   function Creator(form) {
     this.form = form;
+    this.mapMove = __bind(this.mapMove, this);
     this.$modal_container = $('#new-record-modal');
     this.$map_container = this.$modal_container.find('.new-record-map-container');
+    this.$html_form = this.$modal_container.find('form');
     this.init();
   }
 
@@ -372,6 +393,7 @@ Creator = (function() {
     this.map = map_utils.createMap(this.$map_container[0], {
       zoomControl: false
     });
+    this.map.on('moveend', this.mapMove);
     locate_control = L.control.locate({
       follow: true,
       stopFollowingOnDrag: true
@@ -380,17 +402,119 @@ Creator = (function() {
     return locate_control.locate();
   };
 
+  Creator.prototype.mapMove = function() {
+    var center;
+    center = this.map.getCenter();
+    $('#latitude').val(center.lat);
+    return $('#longitude').val(center.lng);
+  };
+
+  Creator.prototype.formSubmit = function() {
+    var xhr_callback, xhr_options;
+    xhr_options = {
+      uri: '/api/records',
+      method: 'POST',
+      body: this.$html_form.serialize(),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    };
+    xhr_callback = (function(_this) {
+      return function(error, response, record_obj) {
+        if (error) {
+          window.alert(error);
+          return;
+        }
+        console.log(record_obj);
+        window.alert('saved!');
+        return _this.destroy();
+      };
+    })(this);
+    return xhr(xhr_options, xhr_callback);
+  };
+
   Creator.prototype.initEvents = function() {
-    return this.$modal_container.on('shown.bs.modal', (function(_this) {
+    this.$html_form.on('submit', (function(_this) {
+      return function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        return _this.formSubmit();
+      };
+    })(this));
+    this.$modal_container.on('shown.bs.modal', (function(_this) {
       return function(event) {
         return _this.createMap();
       };
     })(this));
+    return this.$modal_container.on('hide.bs.modal', (function(_this) {
+      return function(event) {
+        return _this.map.remove();
+      };
+    })(this));
+  };
+
+  Creator.prototype.generateLabel = function(element) {
+    return "<div class='alert alert-info'>" + element.label + "</div>";
+  };
+
+  Creator.prototype.generateSection = function(element) {
+    var html, html_parts, inner_element, inner_element_html, _i, _len, _ref;
+    html_parts = [];
+    _ref = element.elements;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      inner_element = _ref[_i];
+      inner_element_html = this.generateElement(inner_element);
+      html_parts.push(panelBody(inner_element_html));
+      html = panel(html_parts.join(''));
+    }
+    return panel("<div class='panel-heading'><h3 class='panel-title'>" + element.label + "</h3></div>" + (panelBody(html)));
+  };
+
+  Creator.prototype.generateTextField = function(element) {
+    return panel(panelBody(formGroup("<label>" + element.label + "</label><input type='text' class='form-control' data-fulcrum-field-type='" + element.type + "' id='" + element.key + "' name='" + element.key + "'>")));
+  };
+
+  Creator.prototype.generateDateTimeField = function(element) {
+    return panel(panelBody(formGroup("<label>" + element.label + "</label><input type='date' class='form-control' data-fulcrum-field-type='" + element.type + "' id='" + element.key + "' name='" + element.key + "'>")));
+  };
+
+  Creator.prototype.generateTimeField = function(element) {
+    return panel(panelBody(formGroup("<label>" + element.label + "</label><input type='time' class='form-control' data-fulcrum-field-type='" + element.type + "' id='" + element.key + "' name='" + element.key + "'>")));
+  };
+
+  Creator.prototype.generateElement = function(element) {
+    var html;
+    if (this["generate" + element.type]) {
+      html = this["generate" + element.type](element);
+    } else {
+      console.log("Could not render element " + element.type);
+      html = '';
+    }
+    return html;
+  };
+
+  Creator.prototype.generateHTMLContent = function() {
+    var element, parts, _i, _len, _ref;
+    parts = [];
+    _ref = this.form.form_obj.elements;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      element = _ref[_i];
+      parts.push(this.generateElement(element));
+    }
+    return this.html_content = parts.join('');
   };
 
   Creator.prototype.init = function() {
     this.initEvents();
+    this.generateHTMLContent();
+    this.$modal_container.find('.modal-body').find('.content').html(this.html_content);
     return this.$modal_container.modal();
+  };
+
+  Creator.prototype.destroy = function() {
+    this.map.remove();
+    this.$modal_container.find('.modal-body').find('.content').html('');
+    return this.$modal_container.modal('hide');
   };
 
   return Creator;
@@ -401,7 +525,7 @@ module.exports = Creator;
 
 
 
-},{"../map_utils":5}],10:[function(require,module,exports){
+},{"../map_utils":5,"xhr":14}],10:[function(require,module,exports){
 var getRecords, xhr;
 
 xhr = require('xhr');

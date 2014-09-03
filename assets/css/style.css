@@ -71,13 +71,13 @@ body {
 }
 
 /* Inner panels */
-.record-modal .panel .panel {
+.record-modal .panel .panel, .new-record-modal .panel .panel {
   border: none;
   box-shadow: none;
   -webkit-box-shadow: none;
   margin-bottom: 0;
 }
 
-.record-modal .panel .panel .panel-body {
+.record-modal .panel .panel .panel-body, .new-record-modal .panel .panel .panel-body {
   padding: 0;
 }
