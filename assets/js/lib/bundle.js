@@ -89,8 +89,28 @@ Form = (function() {
     return xhr(xhr_options, xhr_callback);
   };
 
+  Form.prototype.choiceFieldKeys = function(iteratable) {
+    var element, keys, section_keys, _i, _iteratable, _len;
+    keys = [];
+    _iteratable = iteratable || this.form_obj.elements;
+    for (_i = 0, _len = _iteratable.length; _i < _len; _i++) {
+      element = _iteratable[_i];
+      if (element.type === 'ChoiceField') {
+        keys.push(element.key);
+      } else if (element.type === 'Section') {
+        section_keys = this.choiceFieldKeys(element.elements);
+        Array.prototype.push.apply(keys, section_keys);
+      }
+    }
+    return keys;
+  };
+
   Form.prototype.name = function() {
     return this.form_obj.name;
+  };
+
+  Form.prototype.id = function() {
+    return this.form_obj.id;
   };
 
   Form.prototype.record_title_key = function() {
@@ -150,6 +170,29 @@ record_utils = require('./records/utils');
 RecordViewer = require('./records/viewer');
 
 RecordCreator = require('./records/creator');
+
+jQuery.fn.serializeObject = function() {
+  var arrayData, objectData;
+  arrayData = this.serializeArray();
+  objectData = {};
+  $.each(arrayData, function() {
+    var value;
+    if (this.value != null) {
+      value = this.value;
+    } else {
+      value = '';
+    }
+    if (objectData[this.name] != null) {
+      if (!objectData[this.name].push) {
+        objectData[this.name] = [objectData[this.name]];
+      }
+      return objectData[this.name].push(value);
+    } else {
+      return objectData[this.name] = value;
+    }
+  });
+  return objectData;
+};
 
 map = map_utils.createMap('map-container');
 
@@ -410,19 +453,44 @@ Creator = (function() {
   };
 
   Creator.prototype.formSubmit = function() {
-    var xhr_callback, xhr_options;
+    var choice_field_key, choice_field_keys, data, form_obj, latitude, longitude, record, value_or_values, xhr_callback, xhr_options, _i, _len;
+    form_obj = this.$html_form.serializeObject();
+    latitude = parseFloat(form_obj.latitude);
+    longitude = parseFloat(form_obj.longitude);
+    delete form_obj.latitude;
+    delete form_obj.longitude;
+    choice_field_keys = this.form.choiceFieldKeys();
+    console.log(choice_field_keys);
+    console.log(form_obj);
+    for (_i = 0, _len = choice_field_keys.length; _i < _len; _i++) {
+      choice_field_key = choice_field_keys[_i];
+      if (choice_field_key in form_obj) {
+        value_or_values = form_obj[choice_field_key];
+        value_or_values = value_or_values instanceof Array ? value_or_values : [value_or_values];
+        form_obj[choice_field_key] = {
+          choice_values: value_or_values,
+          other_values: []
+        };
+      }
+    }
+    record = {
+      latitude: latitude,
+      longitude: longitude,
+      form_id: this.form.id(),
+      form_values: form_obj
+    };
+    data = {
+      record: record
+    };
     xhr_options = {
       uri: '/api/records',
       method: 'POST',
-      body: this.$html_form.serialize(),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
+      json: data
     };
     xhr_callback = (function(_this) {
       return function(error, response, record_obj) {
         if (error) {
-          window.alert(error);
+          window.alert(response.body);
           return;
         }
         console.log(record_obj);
@@ -501,6 +569,23 @@ Creator = (function() {
     input = "<input type='hidden' id='" + element.key + "' name='" + element.key + "'>";
     buttons = "<div class='btn-group btn-group-justified'>" + buttons + "</div>";
     return panel(panelBody(formGroup("<label>" + element.label + "</label>" + buttons + input)));
+  };
+
+  Creator.prototype.generateHyperlinkField = function(element) {
+    return panel(panelBody(formGroup("<label>" + element.label + "</label><input type='text' class='form-control' data-fulcrum-field-type='" + element.type + "' id='" + element.key + "' name='" + element.key + "'>")));
+  };
+
+  Creator.prototype.generateChoiceField = function(element) {
+    var choice, choices, multiple, _i, _len, _ref;
+    multiple = element.multiple ? ' multiple' : '';
+    choices = [];
+    _ref = element.choices;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      choice = _ref[_i];
+      choices.push("<option value='" + choice.value + "'>" + choice.label + "</option>");
+    }
+    choices = choices.join('');
+    return panel(panelBody(formGroup("<label>" + element.label + "</label><select class='form-control' data-fulcrum-field-type='" + element.type + "' id='" + element.key + "' name='" + element.key + "'" + multiple + ">" + choices + "</select>")));
   };
 
   Creator.prototype.generateElement = function(element) {

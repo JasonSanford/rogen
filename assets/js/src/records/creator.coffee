@@ -36,16 +36,40 @@ class Creator
     $('#longitude').val center.lng
 
   formSubmit: ->
+    form_obj = @$html_form.serializeObject()
+
+    latitude  = parseFloat form_obj.latitude
+    longitude = parseFloat form_obj.longitude
+    delete form_obj.latitude
+    delete form_obj.longitude
+
+    choice_field_keys = @form.choiceFieldKeys()
+    console.log choice_field_keys
+    console.log form_obj
+
+    # TODO: Support "other" values
+    for choice_field_key in choice_field_keys
+      if choice_field_key of form_obj
+        value_or_values = form_obj[choice_field_key]
+        value_or_values = if value_or_values instanceof Array then value_or_values else [value_or_values]
+        form_obj[choice_field_key] =
+          choice_values: value_or_values
+          other_values: []
+
+    record =
+      latitude: latitude
+      longitude: longitude
+      form_id: @form.id()
+      form_values: form_obj
+    data =
+      record: record
     xhr_options =
       uri: '/api/records'
       method: 'POST'
-      body: @$html_form.serialize()
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
+      json: data
     xhr_callback = (error, response, record_obj) =>
       if error
-        window.alert error
+        window.alert response.body
         return
       console.log record_obj
       window.alert 'saved!'
@@ -102,6 +126,17 @@ class Creator
     input = "<input type='hidden' id='#{element.key}' name='#{element.key}'>"
     buttons = "<div class='btn-group btn-group-justified'>#{buttons}</div>"
     panel panelBody(formGroup("<label>#{element.label}</label>#{buttons}#{input}"))
+
+  generateHyperlinkField: (element) ->
+    panel panelBody(formGroup("<label>#{element.label}</label><input type='text' class='form-control' data-fulcrum-field-type='#{element.type}' id='#{element.key}' name='#{element.key}'>"))
+
+  generateChoiceField: (element) ->
+    multiple = if element.multiple then ' multiple' else ''
+    choices = []
+    for choice in element.choices
+      choices.push "<option value='#{choice.value}'>#{choice.label}</option>"
+    choices = choices.join ''
+    panel panelBody(formGroup("<label>#{element.label}</label><select class='form-control' data-fulcrum-field-type='#{element.type}' id='#{element.key}' name='#{element.key}'#{multiple}>#{choices}</select>"))
   #
   # /Elements
   #

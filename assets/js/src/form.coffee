@@ -31,8 +31,22 @@ class Form
       @classification_sets[classification_set_id] = classification_set
     xhr xhr_options, xhr_callback
 
+  choiceFieldKeys: (iteratable) ->
+    keys = []
+    _iteratable = iteratable or @form_obj.elements
+    for element in _iteratable
+      if element.type is 'ChoiceField'
+        keys.push element.key
+      else if element.type is 'Section'
+        section_keys = @choiceFieldKeys element.elements
+        Array::push.apply keys, section_keys
+    keys
+
   name: ->
     @form_obj.name
+
+  id: ->
+    @form_obj.id
 
   record_title_key: ->
     @form_obj.record_title_key

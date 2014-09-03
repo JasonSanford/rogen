@@ -32,24 +32,9 @@ router.post '/records', (req, res) ->
   callback = (error, record) ->
     if error
       console.log "Error: #{error}"
-      res.send 'Error'
+      res.send String(error), 500
     res.json record
-
-  body = req.body
-
-  latitude  = body.latitude
-  longitude = body.longitude
-  delete body.latitude
-  delete body.longitude
-
-  record_to_create =
-    form_id: constants.form_id
-    latitude: latitude
-    longitude: longitude
-    form_values: body
-  record_to_create =
-    record: record_to_create
-  fulcrum.records.create record_to_create, callback
+  fulcrum.records.create req.body, callback
 
 router.get '/photos/:photo_id', (req, res) ->
   callback = (error, photo) ->
