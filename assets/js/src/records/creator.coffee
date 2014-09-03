@@ -52,7 +52,7 @@ class Creator
       @destroy()
     xhr xhr_options, xhr_callback
 
-  initEvents: ->
+  initBeforeEvents: ->
     @$html_form.on 'submit', (event) =>
       event.preventDefault()
       event.stopPropagation()
@@ -60,8 +60,16 @@ class Creator
     @$modal_container.on 'shown.bs.modal', (event) =>
       # We need to make sure animations are finished before creating the map
       @createMap()
-    @$modal_container.on 'hide.bs.modal', (event) =>
-      @map.remove()
+    #@$modal_container.on 'hide.bs.modal', (event) =>
+    #  @map.remove()
+
+  initAfterEvents: ->
+    $('.yes-no').on 'click', (event) =>
+      event.preventDefault()
+      $button = $(event.target)
+      $button.siblings('a.yes-no').removeClass 'active'
+      $button.addClass 'active'
+      $("##{$button.data('input-id')}").val $button.data('yes-no-val')
 
   #
   # Elements
@@ -86,6 +94,14 @@ class Creator
 
   generateTimeField: (element) ->
     panel panelBody(formGroup("<label>#{element.label}</label><input type='time' class='form-control' data-fulcrum-field-type='#{element.type}' id='#{element.key}' name='#{element.key}'>"))
+
+  generateYesNoField: (element) ->
+    buttons = "<a class='btn btn-default yes-no' data-input-id='#{element.key}' data-yes-no-val='#{element.positive.value}' role='button'>#{element.positive.label}</a><a class='btn btn-default yes-no' data-input-id='#{element.key}' data-yes-no-val='#{element.negative.value}' role='button'>#{element.negative.label}</a>"
+    if element.neutral_enabled
+      buttons += "<a class='btn btn-default yes-no' data-input-id='#{element.key}' data-yes-no-val='#{element.neutral.value}' role='button'>#{element.neutral.label}</a>"
+    input = "<input type='hidden' id='#{element.key}' name='#{element.key}'>"
+    buttons = "<div class='btn-group btn-group-justified'>#{buttons}</div>"
+    panel panelBody(formGroup("<label>#{element.label}</label>#{buttons}#{input}"))
   #
   # /Elements
   #
@@ -105,10 +121,11 @@ class Creator
     @html_content = parts.join ''
 
   init: ->
-    @initEvents()
+    @initBeforeEvents()
     @generateHTMLContent()
     @$modal_container.find('.modal-body').find('.content').html @html_content
     @$modal_container.modal()
+    @initAfterEvents()
 
   destroy: ->
     @map.remove()

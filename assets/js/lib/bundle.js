@@ -433,7 +433,7 @@ Creator = (function() {
     return xhr(xhr_options, xhr_callback);
   };
 
-  Creator.prototype.initEvents = function() {
+  Creator.prototype.initBeforeEvents = function() {
     this.$html_form.on('submit', (function(_this) {
       return function(event) {
         event.preventDefault();
@@ -441,14 +441,22 @@ Creator = (function() {
         return _this.formSubmit();
       };
     })(this));
-    this.$modal_container.on('shown.bs.modal', (function(_this) {
+    return this.$modal_container.on('shown.bs.modal', (function(_this) {
       return function(event) {
         return _this.createMap();
       };
     })(this));
-    return this.$modal_container.on('hide.bs.modal', (function(_this) {
+  };
+
+  Creator.prototype.initAfterEvents = function() {
+    return $('.yes-no').on('click', (function(_this) {
       return function(event) {
-        return _this.map.remove();
+        var $button;
+        event.preventDefault();
+        $button = $(event.target);
+        $button.siblings('a.yes-no').removeClass('active');
+        $button.addClass('active');
+        return $("#" + ($button.data('input-id'))).val($button.data('yes-no-val'));
       };
     })(this));
   };
@@ -484,6 +492,17 @@ Creator = (function() {
     return panel(panelBody(formGroup("<label>" + element.label + "</label><input type='time' class='form-control' data-fulcrum-field-type='" + element.type + "' id='" + element.key + "' name='" + element.key + "'>")));
   };
 
+  Creator.prototype.generateYesNoField = function(element) {
+    var buttons, input;
+    buttons = "<a class='btn btn-default yes-no' data-input-id='" + element.key + "' data-yes-no-val='" + element.positive.value + "' role='button'>" + element.positive.label + "</a><a class='btn btn-default yes-no' data-input-id='" + element.key + "' data-yes-no-val='" + element.negative.value + "' role='button'>" + element.negative.label + "</a>";
+    if (element.neutral_enabled) {
+      buttons += "<a class='btn btn-default yes-no' data-input-id='" + element.key + "' data-yes-no-val='" + element.neutral.value + "' role='button'>" + element.neutral.label + "</a>";
+    }
+    input = "<input type='hidden' id='" + element.key + "' name='" + element.key + "'>";
+    buttons = "<div class='btn-group btn-group-justified'>" + buttons + "</div>";
+    return panel(panelBody(formGroup("<label>" + element.label + "</label>" + buttons + input)));
+  };
+
   Creator.prototype.generateElement = function(element) {
     var html;
     if (this["generate" + element.type]) {
@@ -507,10 +526,11 @@ Creator = (function() {
   };
 
   Creator.prototype.init = function() {
-    this.initEvents();
+    this.initBeforeEvents();
     this.generateHTMLContent();
     this.$modal_container.find('.modal-body').find('.content').html(this.html_content);
-    return this.$modal_container.modal();
+    this.$modal_container.modal();
+    return this.initAfterEvents();
   };
 
   Creator.prototype.destroy = function() {
