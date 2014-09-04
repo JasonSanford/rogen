@@ -439,7 +439,10 @@ Creator = (function() {
     this.map.on('moveend', this.mapMove);
     locate_control = L.control.locate({
       follow: true,
-      stopFollowingOnDrag: true
+      stopFollowingOnDrag: true,
+      locateOptions: {
+        enableHighAccuracy: true
+      }
     });
     locate_control.addTo(this.map);
     return locate_control.locate();
