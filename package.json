@@ -18,7 +18,8 @@
     "fulcrum-app": "~0.2.1",
     "xhr": "~1.15.0",
     "async": "~0.9.0",
-    "node-uuid": "~1.4.1"
+    "node-uuid": "~1.4.1",
+    "request": "~2.42.0"
   },
   "devDependencies": {
     "coffeeify": "~0.7.0"
