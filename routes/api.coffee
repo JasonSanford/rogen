@@ -45,7 +45,6 @@ router.post '/photos', (req, res) ->
   utils.extend fulcrum_req.headers, fulcrum_req_headers
   delete fulcrum_req.headers.cookie
   req.pipe(fulcrum_req)
-  console.log fulcrum_req.headers
   fulcrum_req.pipe(res)
 
 router.get '/photos/:photo_id', (req, res) ->
