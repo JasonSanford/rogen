@@ -1,6 +1,7 @@
-xhr = require 'xhr'
+xhr  = require 'xhr'
 
-map_utils = require '../map_utils'
+map_utils     = require '../map_utils'
+PhotoUploader = require '../photo_uploader'
 
 panelBody = (panel_body_html) ->
   "<div class='panel-body'>#{panel_body_html}</div>"
@@ -11,8 +12,9 @@ panel = (panel_html) ->
 form = (form_html) ->
   ""
 
-formGroup = (form_group_html) ->
-  "<div class='form-group'>#{form_group_html}</div>"
+formGroup = (form_group_html, css_class) ->
+  _css_class = if css_class then " #{css_class}" else ''
+  "<div class='form-group#{_css_class}'>#{form_group_html}</div>"
 
 class Creator
   constructor: (@form) ->
@@ -21,6 +23,8 @@ class Creator
     @$html_form       = @$modal_container.find('form')
 
     @init()
+
+  photo_uploaders: []
 
   createMap: ->
     @map = map_utils.createMap @$map_container[0], {zoomControl: false}
@@ -130,6 +134,11 @@ class Creator
   generateHyperlinkField: (element) ->
     panel panelBody(formGroup("<label>#{element.label}</label><input type='text' class='form-control' data-fulcrum-field-type='#{element.type}' id='#{element.key}' name='#{element.key}'>"))
 
+  generatePhotoField: (element) ->
+    photo_uploader = new PhotoUploader element.key
+    @photo_uploaders.push photo_uploader
+    panel panelBody(formGroup("<label>#{element.label}</label><div class='photos' id='#{element.key}'><div class='input'></div><hr><div class='uploads row photo-row'></div></div>", 'photos'))
+
   generateChoiceField: (element) ->
     multiple = if element.multiple then ' multiple' else ''
     choices = []
@@ -161,6 +170,8 @@ class Creator
     @$modal_container.find('.modal-body').find('.content').html @html_content
     @$modal_container.modal()
     @initAfterEvents()
+    for photo_uploader in @photo_uploaders
+      photo_uploader.init()
 
   destroy: ->
     @map.remove()

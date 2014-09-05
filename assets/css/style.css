@@ -60,12 +60,16 @@ body {
   display: inline-block;
 }
 
-.record-modal .photo-row {
+.record-modal .form-group.photos, .new-record-modal .form-group.photos {
+  margin-bottom: 0;
+}
+
+.record-modal .photo-row, .new-record-modal .photo-row {
   margin-left: 0;
   margin-right: 0;
 }
 
-.record-modal .photo-row .thumbnail {
+.record-modal .photo-row .thumbnail, .new-record-modal .photo-row .thumbnail {
   margin-right: 5px;
   margin-bottom: 5px;
 }

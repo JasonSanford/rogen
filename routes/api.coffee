@@ -1,4 +1,5 @@
 express = require 'express'
+request = require 'request'
 
 Fulcrum = require 'fulcrum-app'
 
@@ -35,6 +36,17 @@ router.post '/records', (req, res) ->
       res.send String(error), 500
     res.json record
   fulcrum.records.create req.body, callback
+
+router.post '/photos', (req, res) ->
+  fulcrum_req = request('https://api.fulcrumapp.com/api/v2/photos')
+  fulcrum_req_headers =
+    'X-ApiToken': constants.api_key
+    'Accept': 'application/json'
+  utils.extend fulcrum_req.headers, fulcrum_req_headers
+  delete fulcrum_req.headers.cookie
+  req.pipe(fulcrum_req)
+  console.log fulcrum_req.headers
+  fulcrum_req.pipe(res)
 
 router.get '/photos/:photo_id', (req, res) ->
   callback = (error, photo) ->
