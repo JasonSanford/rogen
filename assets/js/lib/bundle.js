@@ -378,8 +378,8 @@ uuid = require('node-uuid');
 xhr = require('xhr');
 
 PhotoUploader = (function() {
-  function PhotoUploader(photo_field_key) {
-    this.photo_field_key = photo_field_key;
+  function PhotoUploader(field_key) {
+    this.field_key = field_key;
   }
 
   PhotoUploader.prototype.photoFormData = function() {
@@ -391,8 +391,12 @@ PhotoUploader = (function() {
     return [attrs];
   };
 
+  PhotoUploader.prototype.photoCount = function() {
+    return this.$uploads.find('.photo').length;
+  };
+
   PhotoUploader.prototype.init = function() {
-    this.$container = $("#" + this.photo_field_key);
+    this.$container = $("#" + this.field_key);
     this.$input_container = this.$container.find('.input');
     this.$uploads = this.$container.find('.uploads');
     return this.generateNewInput();
@@ -423,6 +427,15 @@ PhotoUploader = (function() {
         };
       })(this)
     });
+  };
+
+  PhotoUploader.prototype.asJSON = function() {
+    return this.$uploads.find('.photo').map(function(i, photo) {
+      return {
+        photo_id: $(photo).data('access-key'),
+        caption: ''
+      };
+    }).get();
   };
 
   return PhotoUploader;
@@ -525,16 +538,13 @@ Creator = (function() {
   };
 
   Creator.prototype.formSubmit = function() {
-    var choice_field_key, choice_field_keys, data, form_obj, latitude, longitude, record, value_or_values, xhr_callback, xhr_options, _i, _len;
+    var choice_field_key, choice_field_keys, data, form_obj, latitude, longitude, photo_uploader, record, value_or_values, xhr_callback, xhr_options, _i, _j, _len, _len1, _ref;
     form_obj = this.$html_form.serializeObject();
-    console.log(form_obj);
     latitude = parseFloat(form_obj.latitude);
     longitude = parseFloat(form_obj.longitude);
     delete form_obj.latitude;
     delete form_obj.longitude;
     choice_field_keys = this.form.choiceFieldKeys();
-    console.log(choice_field_keys);
-    console.log(form_obj);
     for (_i = 0, _len = choice_field_keys.length; _i < _len; _i++) {
       choice_field_key = choice_field_keys[_i];
       if (choice_field_key in form_obj) {
@@ -544,6 +554,13 @@ Creator = (function() {
           choice_values: value_or_values,
           other_values: []
         };
+      }
+    }
+    _ref = this.photo_uploaders;
+    for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+      photo_uploader = _ref[_j];
+      if (photo_uploader.photoCount() > 0) {
+        form_obj[photo_uploader.field_key] = photo_uploader.asJSON();
       }
     }
     record = {

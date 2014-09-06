@@ -48,8 +48,6 @@ class Creator
     delete form_obj.longitude
 
     choice_field_keys = @form.choiceFieldKeys()
-    console.log choice_field_keys
-    console.log form_obj
 
     # TODO: Support "other" values
     for choice_field_key in choice_field_keys
@@ -59,6 +57,10 @@ class Creator
         form_obj[choice_field_key] =
           choice_values: value_or_values
           other_values: []
+
+    for photo_uploader in @photo_uploaders
+      if photo_uploader.photoCount() > 0
+        form_obj[photo_uploader.field_key] = photo_uploader.asJSON()
 
     record =
       latitude: latitude

@@ -2,7 +2,7 @@ uuid = require 'node-uuid'
 xhr  = require 'xhr'
 
 class PhotoUploader
-  constructor: (@photo_field_key) ->
+  constructor: (@field_key) ->
 
   photoFormData: ->
     attrs =
@@ -10,8 +10,11 @@ class PhotoUploader
       value: uuid.v4()
     [attrs]
 
+  photoCount: ->
+    @$uploads.find('.photo').length
+
   init: ->
-    @$container       = $("##{@photo_field_key}")
+    @$container       = $("##{@field_key}")
     @$input_container = @$container.find '.input'
     @$uploads         = @$container.find '.uploads'
     @generateNewInput()
@@ -35,5 +38,13 @@ class PhotoUploader
         @renderPhoto data.result.photo
         @generateNewInput()
     })
+
+  asJSON: ->
+    @$uploads.find('.photo').map((i, photo) ->
+      {
+        photo_id: $(photo).data('access-key')
+        caption: ''
+      }
+    ).get()
 
 module.exports = PhotoUploader
