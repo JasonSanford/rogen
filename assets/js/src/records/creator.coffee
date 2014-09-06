@@ -13,8 +13,8 @@ form = (form_html) ->
   ""
 
 formGroup = (form_group_html, css_class) ->
-  _css_class = if css_class then " #{css_class}" else ''
-  "<div class='form-group#{_css_class}'>#{form_group_html}</div>"
+  css_class = if css_class then " #{css_class}" else ''
+  "<div class='form-group#{css_class}'>#{form_group_html}</div>"
 
 class Creator
   constructor: (@form) ->

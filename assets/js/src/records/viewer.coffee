@@ -1,10 +1,8 @@
 PhotoDisplay = require '../photo_display'
 
-panelBody = (panel_body_html) ->
-  "<div class='panel-body'>#{panel_body_html}</div>"
-
-panel = (panel_html) ->
-  "<div class='panel panel-default'>#{panel_html}</div>"
+panel = (panel_html, css_class) ->
+  css_class = if css_class then " #{css_class}" else ''
+  "<div class='panel panel-default#{css_class}'>#{panel_html}</div>"
 
 class Viewer
   constructor: (@form, @record) ->
@@ -72,7 +70,7 @@ class Viewer
         photos_html_parts.push "<div class='thumbnail col-xs-6 col-md-3' id='photo-#{photo.photo_id}'></div>"
         @photo_displays.push new PhotoDisplay(photo)
       photos_html_parts.push '</div>'
-    panel "<div class='panel-heading'><h3 class='panel-title'>#{element.label}</h3></div>#{panelBody(photos_html_parts.join '')}"
+    panel "<div class='panel-heading'><h3 class='panel-title'>#{element.label}</h3></div>#{panelBody(photos_html_parts.join '')}", 'photos'
 
   generateTextField: (element) ->
     if @record.record_geojson.properties[element.key]

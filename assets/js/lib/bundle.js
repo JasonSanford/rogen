@@ -769,12 +769,14 @@ var PhotoDisplay, Viewer, panel, panelBody;
 
 PhotoDisplay = require('../photo_display');
 
-panelBody = function(panel_body_html) {
-  return "<div class='panel-body'>" + panel_body_html + "</div>";
+panelBody = function(panel_body_html, css_class) {
+  css_class = css_class ? " " + css_class : '';
+  return "<div class='panel-body" + css_class + "'>" + panel_body_html + "</div>";
 };
 
-panel = function(panel_html) {
-  return "<div class='panel panel-default'>" + panel_html + "</div>";
+panel = function(panel_html, css_class) {
+  css_class = css_class ? " " + css_class : '';
+  return "<div class='panel panel-default" + css_class + "'>" + panel_html + "</div>";
 };
 
 Viewer = (function() {
@@ -877,7 +879,7 @@ Viewer = (function() {
       }
       photos_html_parts.push('</div>');
     }
-    return panel("<div class='panel-heading'><h3 class='panel-title'>" + element.label + "</h3></div>" + (panelBody(photos_html_parts.join(''))));
+    return panel("<div class='panel-heading'><h3 class='panel-title'>" + element.label + "</h3></div>" + (panelBody(photos_html_parts.join('', 'photos'))), 'photos');
   };
 
   Viewer.prototype.generateTextField = function(element) {
