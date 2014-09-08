@@ -18,9 +18,10 @@ formGroup = (form_group_html, css_class) ->
 
 class Creator
   constructor: (@form) ->
-    @$modal_container = $('#new-record-modal')
-    @$map_container   = @$modal_container.find('.new-record-map-container')
-    @$html_form       = @$modal_container.find('form')
+    @$modal_container    = $('#new-record-modal')
+    @$map_container      = @$modal_container.find('.new-record-map-container')
+    @$html_form          = @$modal_container.find('form')
+    @$record_saved_modal = $('#record-saved-modal')
 
     @init()
 
@@ -78,7 +79,10 @@ class Creator
         window.alert response.body
         return
       console.log record_obj
-      window.alert 'saved!'
+      @$record_saved_modal.modal 'show'
+      setTimeout =>
+        @$record_saved_modal.modal 'hide'
+      , 2000
       @destroy()
     xhr xhr_options, xhr_callback
 

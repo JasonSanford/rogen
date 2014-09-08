@@ -85,3 +85,7 @@ body {
 .record-modal .panel .panel .panel-body, .new-record-modal .panel .panel .panel-body {
   padding: 0;
 }
+
+.saved-record-modal h3 {
+  text-align: center;
+}
