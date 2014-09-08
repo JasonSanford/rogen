@@ -4,6 +4,9 @@ panel = (panel_html, css_class) ->
   css_class = if css_class then " #{css_class}" else ''
   "<div class='panel panel-default#{css_class}'>#{panel_html}</div>"
 
+panelBody = (panel_body_html) ->
+  "<div class='panel-body'>#{panel_body_html}</div>"
+
 class Viewer
   constructor: (@form, @record) ->
     @$modal_container = $('#record-modal')
