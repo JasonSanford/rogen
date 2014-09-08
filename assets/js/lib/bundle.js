@@ -153,7 +153,8 @@ module.exports = {
 
 
 },{"xhr":16}],4:[function(require,module,exports){
-var Form, Record, RecordCreator, RecordViewer, async, formAndRecordsCallback, form_utils, getForm, getRecords, map, map_utils, nameApp, record_utils;
+var App, Form, Record, RecordCreator, RecordViewer, app, async, form_utils, map_utils, record_utils,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 async = require('async');
 
@@ -194,67 +195,87 @@ jQuery.fn.serializeObject = function() {
   return objectData;
 };
 
-map = map_utils.createMap('map-container');
-
-getForm = function(callback) {
-  return form_utils.getForm(function(error, form) {
-    if (error) {
-      return callback(error);
-    } else {
-      return callback(null, form);
-    }
-  });
-};
-
-getRecords = function(callback) {
-  return record_utils.getRecords(function(error, records) {
-    if (error) {
-      return callback(error);
-    } else {
-      return callback(null, records);
-    }
-  });
-};
-
-nameApp = function(app_name) {
-  document.title = app_name;
-  return $('#brand').text(app_name);
-};
-
-formAndRecordsCallback = function(error, results) {
-  var features_layer, form, form_json, geojson_layer_options, records;
-  if (error) {
-    console.log(error);
-    return;
+App = (function() {
+  function App() {
+    this.formAndRecordsCallback = __bind(this.formAndRecordsCallback, this);
   }
-  form_json = results.form;
-  records = results.records;
-  form = new Form(form_json);
-  nameApp(form.name());
-  geojson_layer_options = {
-    onEachFeature: function(feature, layer) {
-      return layer.on('click', function() {
-        var record, record_display;
-        record = new Record(feature, form);
-        return record_display = new RecordViewer(form, record);
-      });
-    }
-  };
-  features_layer = map_utils.createGeoJSONLayer(geojson_layer_options);
-  map.addLayer(features_layer);
-  features_layer.addData(records);
-  map.fitBounds(features_layer.getBounds());
-  return $('#new-record-a').on('click', function(event) {
-    var record_creator;
-    event.preventDefault();
-    return record_creator = new RecordCreator(form);
-  });
-};
 
-async.parallel({
-  form: getForm,
-  records: getRecords
-}, formAndRecordsCallback);
+  App.prototype.init = function() {
+    this.map = map_utils.createMap('map-container');
+    this.initEvents();
+    return async.parallel({
+      form: this.getForm,
+      records: this.getRecords
+    }, this.formAndRecordsCallback);
+  };
+
+  App.prototype.initEvents = function() {
+    return $('#new-record-a').on('click', function(event) {
+      var record_creator;
+      event.preventDefault();
+      return record_creator = new RecordCreator(this.form);
+    });
+  };
+
+  App.prototype.getForm = function(callback) {
+    return form_utils.getForm(function(error, form) {
+      if (error) {
+        return callback(error);
+      } else {
+        return callback(null, form);
+      }
+    });
+  };
+
+  App.prototype.getRecords = function(callback) {
+    return record_utils.getRecords(function(error, records) {
+      if (error) {
+        return callback(error);
+      } else {
+        return callback(null, records);
+      }
+    });
+  };
+
+  App.prototype.nameApp = function(app_name) {
+    document.title = app_name;
+    return $('#brand').text(app_name);
+  };
+
+  App.prototype.formAndRecordsCallback = function(error, results) {
+    var features_layer, form_json, geojson_layer_options, records;
+    if (error) {
+      console.log(error);
+      return;
+    }
+    form_json = results.form;
+    records = results.records;
+    this.form = new Form(form_json);
+    this.nameApp(this.form.name());
+    geojson_layer_options = {
+      onEachFeature: (function(_this) {
+        return function(feature, layer) {
+          return layer.on('click', function() {
+            var record, record_display;
+            record = new Record(feature, _this.form);
+            return record_display = new RecordViewer(_this.form, record);
+          });
+        };
+      })(this)
+    };
+    features_layer = map_utils.createGeoJSONLayer(geojson_layer_options);
+    this.map.addLayer(features_layer);
+    features_layer.addData(records);
+    return this.map.fitBounds(features_layer.getBounds());
+  };
+
+  return App;
+
+})();
+
+app = new App();
+
+app.init();
 
 
 
@@ -496,9 +517,8 @@ form = function(form_html) {
 };
 
 formGroup = function(form_group_html, css_class) {
-  var _css_class;
-  _css_class = css_class ? " " + css_class : '';
-  return "<div class='form-group" + _css_class + "'>" + form_group_html + "</div>";
+  css_class = css_class ? " " + css_class : '';
+  return "<div class='form-group" + css_class + "'>" + form_group_html + "</div>";
 };
 
 Creator = (function() {
@@ -769,14 +789,13 @@ var PhotoDisplay, Viewer, panel, panelBody;
 
 PhotoDisplay = require('../photo_display');
 
-panelBody = function(panel_body_html, css_class) {
-  css_class = css_class ? " " + css_class : '';
-  return "<div class='panel-body" + css_class + "'>" + panel_body_html + "</div>";
-};
-
 panel = function(panel_html, css_class) {
   css_class = css_class ? " " + css_class : '';
   return "<div class='panel panel-default" + css_class + "'>" + panel_html + "</div>";
+};
+
+panelBody = function(panel_body_html) {
+  return "<div class='panel-body'>" + panel_body_html + "</div>";
 };
 
 Viewer = (function() {
@@ -879,7 +898,7 @@ Viewer = (function() {
       }
       photos_html_parts.push('</div>');
     }
-    return panel("<div class='panel-heading'><h3 class='panel-title'>" + element.label + "</h3></div>" + (panelBody(photos_html_parts.join('', 'photos'))), 'photos');
+    return panel("<div class='panel-heading'><h3 class='panel-title'>" + element.label + "</h3></div>" + (panelBody(photos_html_parts.join(''))), 'photos');
   };
 
   Viewer.prototype.generateTextField = function(element) {

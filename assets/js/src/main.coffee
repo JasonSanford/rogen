@@ -57,7 +57,7 @@ class App
     document.title = app_name
     $('#brand').text app_name
 
-  formAndRecordsCallback: (error, results) ->
+  formAndRecordsCallback: (error, results) =>
     if error
       console.log error
       return
@@ -70,8 +70,8 @@ class App
     @nameApp @form.name()
 
     geojson_layer_options =
-      onEachFeature: (feature, layer) ->
-        layer.on 'click', ->
+      onEachFeature: (feature, layer) =>
+        layer.on 'click', =>
           record = new Record feature, @form
           record_display = new RecordViewer @form, record
     features_layer = map_utils.createGeoJSONLayer geojson_layer_options
