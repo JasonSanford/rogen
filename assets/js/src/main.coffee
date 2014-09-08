@@ -28,52 +28,58 @@ jQuery.fn.serializeObject = ->
 
   return objectData
 
-map = map_utils.createMap 'map-container'
+class App
+  init: ->
+    @map = map_utils.createMap 'map-container'
+    @initEvents()
+    async.parallel {form: @getForm, records: @getRecords}, @formAndRecordsCallback
 
-getForm = (callback) ->
-  form_utils.getForm (error, form) ->
+  initEvents: ->
+    $('#new-record-a').on 'click', (event) ->
+      event.preventDefault()
+      record_creator = new RecordCreator @form
+
+  getForm: (callback) ->
+    form_utils.getForm (error, form) ->
+      if error
+        callback error
+      else
+        callback null, form
+
+  getRecords: (callback) ->
+    record_utils.getRecords (error, records) ->
+      if error
+        callback error
+      else
+        callback null, records
+
+  nameApp: (app_name) ->
+    document.title = app_name
+    $('#brand').text app_name
+
+  formAndRecordsCallback: (error, results) ->
     if error
-      callback error
-    else
-      callback null, form
+      console.log error
+      return
 
-getRecords = (callback) ->
-  record_utils.getRecords (error, records) ->
-    if error
-      callback error
-    else
-      callback null, records
+    form_json = results.form
+    records   = results.records
 
-nameApp = (app_name) ->
-  document.title = app_name
-  $('#brand').text app_name
+    @form = new Form form_json
 
-formAndRecordsCallback = (error, results) ->
-  if error
-    console.log error
-    return
+    @nameApp @form.name()
 
-  form_json = results.form
-  records   = results.records
+    geojson_layer_options =
+      onEachFeature: (feature, layer) ->
+        layer.on 'click', ->
+          record = new Record feature, @form
+          record_display = new RecordViewer @form, record
+    features_layer = map_utils.createGeoJSONLayer geojson_layer_options
 
-  form = new Form form_json
+    @map.addLayer features_layer
 
-  nameApp form.name()
+    features_layer.addData records
+    @map.fitBounds features_layer.getBounds()
 
-  geojson_layer_options =
-    onEachFeature: (feature, layer) ->
-      layer.on 'click', ->
-        record = new Record feature, form
-        record_display = new RecordViewer form, record
-  features_layer = map_utils.createGeoJSONLayer geojson_layer_options
-
-  map.addLayer features_layer
-
-  features_layer.addData records
-  map.fitBounds features_layer.getBounds()
-
-  $('#new-record-a').on 'click', (event) ->
-    event.preventDefault()
-    record_creator = new RecordCreator form
-
-async.parallel {form: getForm, records: getRecords}, formAndRecordsCallback
+app = new App()
+app.init()
