@@ -6,7 +6,7 @@ Fulcrum = require 'fulcrum-app'
 constants = require '../constants'
 utils     = require '../utils'
 
-fulcrum = new Fulcrum({api_key: constants.api_key, url: 'https://edge.fulcrumapp.com/api/v2/'})
+fulcrum = new Fulcrum({api_key: constants.api_key, url: 'https://api.fulcrumapp.com/api/v2/'})
 router  = express.Router()
 
 router.get '/form', (req, res) ->
@@ -39,7 +39,7 @@ router.post '/records', (req, res) ->
   fulcrum.records.create req.body, callback
 
 router.post '/photos', (req, res) ->
-  fulcrum_req = request('https://edge.fulcrumapp.com/api/v2/photos')
+  fulcrum_req = request('https://api.fulcrumapp.com/api/v2/photos')
   fulcrum_req_headers =
     'X-ApiToken': constants.api_key
     'Accept': 'application/json'
