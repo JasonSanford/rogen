@@ -27,7 +27,7 @@ class PhotoUploader
 
   generateNewInput: ->
     @$input_container.html ""
-    @$input_container.html "<input type='file' accept='image/*;capture=camera' class='form-control photo_upload' name='photo[file]'>"
+    @$input_container.html "<div class='add-photo'><input type='file' accept='image/*;capture=camera' class='form-control photo_upload' name='photo[file]'><a href='#add_photo'><i class='glyphicon glyphicon-plus'></i>Add photo</a></div>"
     $input = @$input_container.find('.photo_upload')
     $input.fileupload({
       url: '/api/photos'
@@ -38,6 +38,10 @@ class PhotoUploader
         @renderPhoto data.result.photo
         @generateNewInput()
     })
+    $add_photo_link = $input.siblings('a')
+    $add_photo_link.on 'click', (event) ->
+      event.preventDefault()
+      $input.trigger 'click'
 
   asJSON: ->
     @$uploads.find('.photo').map((i, photo) ->

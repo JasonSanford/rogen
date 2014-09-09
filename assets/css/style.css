@@ -86,6 +86,14 @@ body {
   padding: 0;
 }
 
+.new-record-modal .add-photo input {
+  opacity: .001;
+  position: relative;
+  z-index: 30;
+  width: 80px;
+  height: 30px;
+}
+
 .saved-record-modal h3 {
   text-align: center;
 }

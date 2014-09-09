@@ -438,11 +438,11 @@ PhotoUploader = (function() {
   };
 
   PhotoUploader.prototype.generateNewInput = function() {
-    var $input;
+    var $add_photo_link, $input;
     this.$input_container.html("");
-    this.$input_container.html("<input type='file' accept='image/*;capture=camera' class='form-control photo_upload' name='photo[file]'>");
+    this.$input_container.html("<div class='add-photo'><input type='file' accept='image/*;capture=camera' class='form-control photo_upload' name='photo[file]'><a href='#add_photo'><i class='glyphicon glyphicon-plus'></i>Add photo</a></div>");
     $input = this.$input_container.find('.photo_upload');
-    return $input.fileupload({
+    $input.fileupload({
       url: '/api/photos',
       dataType: 'json',
       formData: this.photoFormData(),
@@ -453,6 +453,11 @@ PhotoUploader = (function() {
           return _this.generateNewInput();
         };
       })(this)
+    });
+    $add_photo_link = $input.siblings('a');
+    return $add_photo_link.on('click', function(event) {
+      event.preventDefault();
+      return $input.trigger('click');
     });
   };
 
