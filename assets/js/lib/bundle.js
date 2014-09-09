@@ -210,11 +210,13 @@ App = (function() {
   };
 
   App.prototype.initEvents = function() {
-    return $('#new-record-a').on('click', function(event) {
-      var record_creator;
-      event.preventDefault();
-      return record_creator = new RecordCreator(this.form);
-    });
+    return $('#new-record-a').on('click', (function(_this) {
+      return function(event) {
+        var record_creator;
+        event.preventDefault();
+        return record_creator = new RecordCreator(_this.form);
+      };
+    })(this));
   };
 
   App.prototype.getForm = function(callback) {
@@ -528,6 +530,7 @@ Creator = (function() {
     this.$modal_container = $('#new-record-modal');
     this.$map_container = this.$modal_container.find('.new-record-map-container');
     this.$html_form = this.$modal_container.find('form');
+    this.$saved_record_modal = $('#saved-record-modal');
     this.init();
   }
 
@@ -604,7 +607,10 @@ Creator = (function() {
           return;
         }
         console.log(record_obj);
-        window.alert('saved!');
+        _this.$saved_record_modal.modal('show');
+        setTimeout(function() {
+          return _this.$saved_record_modal.modal('hide');
+        }, 2000);
         return _this.destroy();
       };
     })(this);

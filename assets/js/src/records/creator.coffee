@@ -21,7 +21,7 @@ class Creator
     @$modal_container    = $('#new-record-modal')
     @$map_container      = @$modal_container.find('.new-record-map-container')
     @$html_form          = @$modal_container.find('form')
-    @$record_saved_modal = $('#record-saved-modal')
+    @$saved_record_modal = $('#saved-record-modal')
 
     @init()
 
@@ -79,9 +79,9 @@ class Creator
         window.alert response.body
         return
       console.log record_obj
-      @$record_saved_modal.modal 'show'
+      @$saved_record_modal.modal 'show'
       setTimeout =>
-        @$record_saved_modal.modal 'hide'
+        @$saved_record_modal.modal 'hide'
       , 2000
       @destroy()
     xhr xhr_options, xhr_callback

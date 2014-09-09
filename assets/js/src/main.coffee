@@ -35,7 +35,7 @@ class App
     async.parallel {form: @getForm, records: @getRecords}, @formAndRecordsCallback
 
   initEvents: ->
-    $('#new-record-a').on 'click', (event) ->
+    $('#new-record-a').on 'click', (event) =>
       event.preventDefault()
       record_creator = new RecordCreator @form
 
