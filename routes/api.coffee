@@ -34,7 +34,8 @@ router.post '/records', (req, res) ->
     if error
       console.log "Error: #{error}"
       res.send String(error), 500
-    res.json record
+    record_feature = recordToFeature record.record
+    res.json record_feature
   fulcrum.records.create req.body, callback
 
 router.post '/photos', (req, res) ->
@@ -73,16 +74,20 @@ recordsToFeatureCollection = (records) ->
     per_page     : records.per_page
 
   for record in records.records
-    geometry =
-      type        : 'Point'
-      coordinates : [record.longitude, record.latitude]
-    feature =
-      type       : 'Feature'
-      id         : record.id
-      properties : record.form_values
-      geometry   : geometry
+    feature = recordToFeature record
     feature_collection.features.push feature
 
   feature_collection
+
+recordToFeature = (record) ->
+  geometry =
+    type        : 'Point'
+    coordinates : [record.longitude, record.latitude]
+  feature =
+    type       : 'Feature'
+    id         : record.id
+    properties : record.form_values
+    geometry   : geometry
+  feature
 
 module.exports = router

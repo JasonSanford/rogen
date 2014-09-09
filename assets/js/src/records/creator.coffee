@@ -17,7 +17,7 @@ formGroup = (form_group_html, css_class) ->
   "<div class='form-group#{css_class}'>#{form_group_html}</div>"
 
 class Creator
-  constructor: (@form) ->
+  constructor: (@form, @app) ->
     @$modal_container    = $('#new-record-modal')
     @$map_container      = @$modal_container.find('.new-record-map-container')
     @$html_form          = @$modal_container.find('form')
@@ -74,11 +74,11 @@ class Creator
       uri: '/api/records'
       method: 'POST'
       json: data
-    xhr_callback = (error, response, record_obj) =>
+    xhr_callback = (error, response, record_as_feature) =>
       if error
         window.alert response.body
         return
-      console.log record_obj
+      @app.addRecord record_as_feature
       @$saved_record_modal.modal 'show'
       setTimeout =>
         @$saved_record_modal.modal 'hide'

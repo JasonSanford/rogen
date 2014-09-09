@@ -37,7 +37,7 @@ class App
   initEvents: ->
     $('#new-record-a').on 'click', (event) =>
       event.preventDefault()
-      record_creator = new RecordCreator @form
+      record_creator = new RecordCreator @form, @
 
   getForm: (callback) ->
     form_utils.getForm (error, form) ->
@@ -52,6 +52,9 @@ class App
         callback error
       else
         callback null, records
+
+  addRecord: (record_as_feature) ->
+    @features_layer.addData record_as_feature
 
   nameApp: (app_name) ->
     document.title = app_name
@@ -74,12 +77,12 @@ class App
         layer.on 'click', =>
           record = new Record feature, @form
           record_display = new RecordViewer @form, record
-    features_layer = map_utils.createGeoJSONLayer geojson_layer_options
+    @features_layer = map_utils.createGeoJSONLayer geojson_layer_options
 
-    @map.addLayer features_layer
+    @map.addLayer @features_layer
 
-    features_layer.addData records
-    @map.fitBounds features_layer.getBounds()
+    @features_layer.addData records
+    @map.fitBounds @features_layer.getBounds()
 
 app = new App()
 app.init()

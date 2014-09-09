@@ -23,7 +23,7 @@ class Viewer
       else
         values = [if choice_values.length then choice_values[0] else other_values[0]]
       display = values.join ', '
-      display = '%nbsp;' if not display
+      display = '&nbsp;' if not display
     else
       display = '&nbsp;'
     panel panelBody("<dl><dt>#{element.label}</dt><dd>#{display}</dd></dl>")
@@ -38,7 +38,7 @@ class Viewer
         values = [if choice_values.length then choice_values[0] else other_values[0]]
       values = values.map (value) => @form.classification_sets[element.classification_set_id].getValueByID(value)
       display = values.join ', '
-      display = '%nbsp;' if not display
+      display = '&nbsp;' if not display
     else
       display = '&nbsp;'
     panel panelBody("<dl><dt>#{element.label}</dt><dd>#{display}</dd></dl>")
@@ -51,7 +51,7 @@ class Viewer
 
   generateTimeFieldAndDateTimeField: (element) ->
     value = @record.record_geojson.properties[element.key]
-    value = '%nbsp;' if not value
+    value = '&nbsp;' if not value
     panel panelBody("<dl><dt>#{element.label}</dt><dd>#{value}</dd></dl>")
 
   generateHyperlinkField: (element) ->

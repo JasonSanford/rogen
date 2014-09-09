@@ -214,7 +214,7 @@ App = (function() {
       return function(event) {
         var record_creator;
         event.preventDefault();
-        return record_creator = new RecordCreator(_this.form);
+        return record_creator = new RecordCreator(_this.form, _this);
       };
     })(this));
   };
@@ -239,13 +239,17 @@ App = (function() {
     });
   };
 
+  App.prototype.addRecord = function(record_as_feature) {
+    return this.features_layer.addData(record_as_feature);
+  };
+
   App.prototype.nameApp = function(app_name) {
     document.title = app_name;
     return $('#brand').text(app_name);
   };
 
   App.prototype.formAndRecordsCallback = function(error, results) {
-    var features_layer, form_json, geojson_layer_options, records;
+    var form_json, geojson_layer_options, records;
     if (error) {
       console.log(error);
       return;
@@ -265,10 +269,10 @@ App = (function() {
         };
       })(this)
     };
-    features_layer = map_utils.createGeoJSONLayer(geojson_layer_options);
-    this.map.addLayer(features_layer);
-    features_layer.addData(records);
-    return this.map.fitBounds(features_layer.getBounds());
+    this.features_layer = map_utils.createGeoJSONLayer(geojson_layer_options);
+    this.map.addLayer(this.features_layer);
+    this.features_layer.addData(records);
+    return this.map.fitBounds(this.features_layer.getBounds());
   };
 
   return App;
@@ -524,8 +528,9 @@ formGroup = function(form_group_html, css_class) {
 };
 
 Creator = (function() {
-  function Creator(form) {
+  function Creator(form, app) {
     this.form = form;
+    this.app = app;
     this.mapMove = __bind(this.mapMove, this);
     this.$modal_container = $('#new-record-modal');
     this.$map_container = this.$modal_container.find('.new-record-map-container');
@@ -601,12 +606,12 @@ Creator = (function() {
       json: data
     };
     xhr_callback = (function(_this) {
-      return function(error, response, record_obj) {
+      return function(error, response, record_as_feature) {
         if (error) {
           window.alert(response.body);
           return;
         }
-        console.log(record_obj);
+        _this.app.addRecord(record_as_feature);
         _this.$saved_record_modal.modal('show');
         setTimeout(function() {
           return _this.$saved_record_modal.modal('hide');
@@ -826,7 +831,7 @@ Viewer = (function() {
       }
       display = values.join(', ');
       if (!display) {
-        display = '%nbsp;';
+        display = '&nbsp;';
       }
     } else {
       display = '&nbsp;';
@@ -851,7 +856,7 @@ Viewer = (function() {
       })(this));
       display = values.join(', ');
       if (!display) {
-        display = '%nbsp;';
+        display = '&nbsp;';
       }
     } else {
       display = '&nbsp;';
@@ -871,7 +876,7 @@ Viewer = (function() {
     var value;
     value = this.record.record_geojson.properties[element.key];
     if (!value) {
-      value = '%nbsp;';
+      value = '&nbsp;';
     }
     return panel(panelBody("<dl><dt>" + element.label + "</dt><dd>" + value + "</dd></dl>"));
   };
