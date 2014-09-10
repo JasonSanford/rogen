@@ -90,18 +90,11 @@ class Viewer
     if value
       if value is element.positive.value
         pos_neg_neu = 'positive'
-        alert_klass = 'success'
-        glyphicon   = 'thumbs-up'
       else if value is element.negative.value
         pos_neg_neu = 'negative'
-        alert_klass = 'danger'
-        glyphicon   = 'thumbs-down'
       else
         pos_neg_neu = 'neutral'
-        alert_klass = 'warning'
-        glyphicon   = 'adjust'
-      label = element[pos_neg_neu].label
-      value = "<div class='alert alert-#{alert_klass} yesno'><i class='glyphicon glyphicon-#{glyphicon}' /> <strong>#{label}</strong></div>"
+      value = element[pos_neg_neu].label
     else
       value = '&nbsp;'
     panel panelBody("<dl><dt>#{element.label}</dt><dd>#{value}</dd></dl>")
