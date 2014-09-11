@@ -438,10 +438,18 @@ PhotoUploader = (function() {
   };
 
   PhotoUploader.prototype.generateNewInput = function() {
-    var $add_photo_link, $input;
+    var $add_photo_link, $input, $progress, $progress_bar;
     this.$input_container.html("");
-    this.$input_container.html("<div class='add-photo'><input type='file' accept='image/*;capture=camera' class='form-control photo_upload' name='photo[file]'><a href='#add_photo'><i class='glyphicon glyphicon-plus'></i>Add photo</a></div>");
+    this.$input_container.html("<div class='add-photo'><input type='file' accept='image/*;capture=camera' class='form-control photo_upload' name='photo[file]'><a href='#add_photo'><i class='glyphicon glyphicon-plus'></i>Add photo</a><div class='progress' style='display: none;'><div class='progress-bar' role='progressbar' style='width: 0%;'></div></div></div>");
     $input = this.$input_container.find('.photo_upload');
+    $progress = this.$input_container.find('.progress');
+    $progress_bar = this.$input_container.find('.progress-bar');
+    $input.bind('fileuploadprogress', function(e, data) {
+      var progress;
+      progress = parseInt(data.loaded / data.total * 100, 10);
+      $progress.show();
+      return $progress_bar.css('width', "" + progress + "%");
+    });
     $input.fileupload({
       url: '/api/photos',
       dataType: 'json',

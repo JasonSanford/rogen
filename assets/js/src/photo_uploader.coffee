@@ -27,8 +27,14 @@ class PhotoUploader
 
   generateNewInput: ->
     @$input_container.html ""
-    @$input_container.html "<div class='add-photo'><input type='file' accept='image/*;capture=camera' class='form-control photo_upload' name='photo[file]'><a href='#add_photo'><i class='glyphicon glyphicon-plus'></i>Add photo</a></div>"
-    $input = @$input_container.find('.photo_upload')
+    @$input_container.html "<div class='add-photo'><input type='file' accept='image/*;capture=camera' class='form-control photo_upload' name='photo[file]'><a href='#add_photo'><i class='glyphicon glyphicon-plus'></i>Add photo</a><div class='progress' style='display: none;'><div class='progress-bar' role='progressbar' style='width: 0%;'></div></div></div>"
+    $input        = @$input_container.find '.photo_upload'
+    $progress     = @$input_container.find '.progress'
+    $progress_bar = @$input_container.find '.progress-bar'
+    $input.bind 'fileuploadprogress', (e, data) ->
+      progress = parseInt(data.loaded / data.total * 100, 10)
+      $progress.show()
+      $progress_bar.css 'width', "#{progress}%"
     $input.fileupload({
       url: '/api/photos'
       dataType: 'json'
