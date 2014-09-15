@@ -365,8 +365,9 @@ var PhotoDisplay, xhr;
 xhr = require('xhr');
 
 PhotoDisplay = (function() {
-  function PhotoDisplay(photo_obj) {
+  function PhotoDisplay(photo_obj, caption) {
     this.photo_obj = photo_obj;
+    this.caption = caption;
   }
 
   PhotoDisplay.prototype.render = function() {
@@ -382,7 +383,7 @@ PhotoDisplay = (function() {
           console.log(error);
           return;
         }
-        photo_html_parts = ["<a href='" + photo_obj.photo.large + "' target='_blank'>", "<img src='" + photo_obj.photo.thumbnail + "' />", "</a>"];
+        photo_html_parts = ["<a href='" + photo_obj.photo.large + "' target='_blank'>", "<img src='" + photo_obj.photo.thumbnail + "' />", "</a>", "<p>" + _this.caption + "</p>"];
         return $("#photo-" + _this.photo_obj.photo_id).html(photo_html_parts.join(''));
       };
     })(this);
@@ -433,7 +434,7 @@ PhotoUploader = (function() {
     var access_key, html, thumbnail_url;
     thumbnail_url = photo_data.thumbnail;
     access_key = photo_data.access_key;
-    html = "<div class='thumbnail photo col-xs-6 col-md-3' data-access-key='" + access_key + "'><img src='" + thumbnail_url + "' /></div>";
+    html = "<div class='thumbnail photo col-xs-6 col-md-3' data-access-key='" + access_key + "'><img src='" + thumbnail_url + "' /><input type='text' placeholder='Caption (optional)' class='caption form-control'></div>";
     return this.$uploads.append(html);
   };
 
@@ -471,9 +472,11 @@ PhotoUploader = (function() {
 
   PhotoUploader.prototype.asJSON = function() {
     return this.$uploads.find('.photo').map(function(i, photo) {
+      var $photo;
+      $photo = $(photo);
       return {
-        photo_id: $(photo).data('access-key'),
-        caption: ''
+        photo_id: $photo.data('access-key'),
+        caption: $photo.find('.caption').val() || ''
       };
     }).get();
   };
@@ -912,7 +915,7 @@ Viewer = (function() {
   };
 
   Viewer.prototype.generatePhotoField = function(element) {
-    var photo, photos_html_parts, _i, _len, _ref;
+    var caption, photo, photos_html_parts, _i, _len, _ref;
     photos_html_parts = [];
     if (this.record.record_geojson.properties[element.key]) {
       photos_html_parts.push('<div class="row photo-row">');
@@ -920,7 +923,8 @@ Viewer = (function() {
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         photo = _ref[_i];
         photos_html_parts.push("<div class='thumbnail col-xs-6 col-md-3' id='photo-" + photo.photo_id + "'></div>");
-        this.photo_displays.push(new PhotoDisplay(photo));
+        caption = photo.caption || '&nbsp;';
+        this.photo_displays.push(new PhotoDisplay(photo, caption));
       }
       photos_html_parts.push('</div>');
     }

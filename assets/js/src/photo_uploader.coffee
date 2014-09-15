@@ -22,7 +22,7 @@ class PhotoUploader
   renderPhoto: (photo_data) ->
     thumbnail_url = photo_data.thumbnail
     access_key    = photo_data.access_key
-    html = "<div class='thumbnail photo col-xs-6 col-md-3' data-access-key='#{access_key}'><img src='#{thumbnail_url}' /></div>"
+    html = "<div class='thumbnail photo col-xs-6 col-md-3' data-access-key='#{access_key}'><img src='#{thumbnail_url}' /><input type='text' placeholder='Caption (optional)' class='caption form-control'></div>"
     @$uploads.append html
 
   generateNewInput: ->
@@ -36,11 +36,11 @@ class PhotoUploader
       $progress.show()
       $progress_bar.css 'width', "#{progress}%"
     $input.fileupload({
-      url: '/api/photos'
-      dataType: 'json'
-      formData: @photoFormData()
-      paramName: 'photo[file]'
-      done: (e, data) =>
+      url       : '/api/photos'
+      dataType  : 'json'
+      formData  : @photoFormData()
+      paramName : 'photo[file]'
+      done      : (e, data) =>
         @renderPhoto data.result.photo
         @generateNewInput()
     })
@@ -51,9 +51,10 @@ class PhotoUploader
 
   asJSON: ->
     @$uploads.find('.photo').map((i, photo) ->
+      $photo = $(photo)
       {
-        photo_id: $(photo).data('access-key')
-        caption: ''
+        photo_id : $photo.data('access-key')
+        caption  : $photo.find('.caption').val() or ''
       }
     ).get()
 

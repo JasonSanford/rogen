@@ -71,7 +71,8 @@ class Viewer
       photos_html_parts.push '<div class="row photo-row">'
       for photo in @record.record_geojson.properties[element.key]
         photos_html_parts.push "<div class='thumbnail col-xs-6 col-md-3' id='photo-#{photo.photo_id}'></div>"
-        @photo_displays.push new PhotoDisplay(photo)
+        caption = photo.caption or '&nbsp;'
+        @photo_displays.push new PhotoDisplay(photo, caption)
       photos_html_parts.push '</div>'
     panel "<div class='panel-heading'><h3 class='panel-title'>#{element.label}</h3></div>#{panelBody(photos_html_parts.join '')}", 'photos'
 

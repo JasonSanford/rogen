@@ -1,7 +1,7 @@
 xhr = require 'xhr'
 
 class PhotoDisplay
-  constructor: (@photo_obj) ->
+  constructor: (@photo_obj, @caption) ->
 
   render: ->
     xhr_options =
@@ -14,7 +14,8 @@ class PhotoDisplay
       photo_html_parts = [
         "<a href='#{photo_obj.photo.large}' target='_blank'>",
         "<img src='#{photo_obj.photo.thumbnail}' />",
-        "</a>"
+        "</a>",
+        "<p>#{@caption}</p>"
       ]
       $("#photo-#{@photo_obj.photo_id}").html photo_html_parts.join('')
     xhr xhr_options, xhr_callback
