@@ -83,6 +83,11 @@ body {
   text-align: center;
 }
 
+.new-record-modal .form-group.required label:after {
+  content:"*";
+  color:red;
+}
+
 /* Inner panels */
 .record-modal .panel .panel:not(.photos), .new-record-modal .panel .panel:not(.photos) {
   border: none;

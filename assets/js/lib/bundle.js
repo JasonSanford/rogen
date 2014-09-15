@@ -538,8 +538,11 @@ form = function(form_html) {
   return "";
 };
 
-formGroup = function(form_group_html, css_class) {
+formGroup = function(form_group_html, css_class, required) {
   css_class = css_class ? " " + css_class : '';
+  if (required) {
+    css_class += ' required';
+  }
   return "<div class='form-group" + css_class + "'>" + form_group_html + "</div>";
 };
 
@@ -694,15 +697,15 @@ Creator = (function() {
   Creator.prototype.generateTextField = function(element) {
     var input_type;
     input_type = element.numeric ? 'number' : 'text';
-    return panel(panelBody(formGroup("<label>" + element.label + "</label><input type='" + input_type + "' class='form-control' data-fulcrum-field-type='" + element.type + "' id='" + element.key + "' name='" + element.key + "'>")));
+    return panel(panelBody(formGroup("<label>" + element.label + "</label><input type='" + input_type + "' class='form-control' data-fulcrum-field-type='" + element.type + "' id='" + element.key + "' name='" + element.key + "'>", null, element.required)));
   };
 
   Creator.prototype.generateDateTimeField = function(element) {
-    return panel(panelBody(formGroup("<label>" + element.label + "</label><input type='date' class='form-control' data-fulcrum-field-type='" + element.type + "' id='" + element.key + "' name='" + element.key + "'>")));
+    return panel(panelBody(formGroup("<label>" + element.label + "</label><input type='date' class='form-control' data-fulcrum-field-type='" + element.type + "' id='" + element.key + "' name='" + element.key + "'>", null, element.required)));
   };
 
   Creator.prototype.generateTimeField = function(element) {
-    return panel(panelBody(formGroup("<label>" + element.label + "</label><input type='time' class='form-control' data-fulcrum-field-type='" + element.type + "' id='" + element.key + "' name='" + element.key + "'>")));
+    return panel(panelBody(formGroup("<label>" + element.label + "</label><input type='time' class='form-control' data-fulcrum-field-type='" + element.type + "' id='" + element.key + "' name='" + element.key + "'>", null, element.required)));
   };
 
   Creator.prototype.generateYesNoField = function(element) {
@@ -713,18 +716,18 @@ Creator = (function() {
     }
     input = "<input type='hidden' id='" + element.key + "' name='" + element.key + "'>";
     buttons = "<div class='btn-group btn-group-justified'>" + buttons + "</div>";
-    return panel(panelBody(formGroup("<label>" + element.label + "</label>" + buttons + input)));
+    return panel(panelBody(formGroup("<label>" + element.label + "</label>" + buttons + input, null, element.required)));
   };
 
   Creator.prototype.generateHyperlinkField = function(element) {
-    return panel(panelBody(formGroup("<label>" + element.label + "</label><input type='text' class='form-control' data-fulcrum-field-type='" + element.type + "' id='" + element.key + "' name='" + element.key + "'>")));
+    return panel(panelBody(formGroup("<label>" + element.label + "</label><input type='text' class='form-control' data-fulcrum-field-type='" + element.type + "' id='" + element.key + "' name='" + element.key + "'>", null, element.required)));
   };
 
   Creator.prototype.generatePhotoField = function(element) {
     var photo_uploader;
     photo_uploader = new PhotoUploader(element.key);
     this.photo_uploaders.push(photo_uploader);
-    return panel(panelBody(formGroup("<label>" + element.label + "</label><div class='photos' id='" + element.key + "'><div class='input'></div><hr><div class='uploads row photo-row'></div></div>", 'photos')));
+    return panel(panelBody(formGroup("<label>" + element.label + "</label><div class='photos' id='" + element.key + "'><div class='input'></div><hr><div class='uploads row photo-row'></div></div>", 'photos', element.required)));
   };
 
   Creator.prototype.generateChoiceField = function(element) {
@@ -737,7 +740,7 @@ Creator = (function() {
       choices.push("<option value='" + choice.value + "'>" + choice.label + "</option>");
     }
     choices = choices.join('');
-    return panel(panelBody(formGroup("<label>" + element.label + "</label><select class='form-control' data-fulcrum-field-type='" + element.type + "' id='" + element.key + "' name='" + element.key + "'" + multiple + ">" + choices + "</select>")));
+    return panel(panelBody(formGroup("<label>" + element.label + "</label><select class='form-control' data-fulcrum-field-type='" + element.type + "' id='" + element.key + "' name='" + element.key + "'" + multiple + ">" + choices + "</select>", null, element.required)));
   };
 
   Creator.prototype.generateElement = function(element) {

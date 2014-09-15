@@ -12,8 +12,10 @@ panel = (panel_html) ->
 form = (form_html) ->
   ""
 
-formGroup = (form_group_html, css_class) ->
+formGroup = (form_group_html, css_class, required) ->
   css_class = if css_class then " #{css_class}" else ''
+  if required
+    css_class += ' required'
   "<div class='form-group#{css_class}'>#{form_group_html}</div>"
 
 class Creator
@@ -121,13 +123,13 @@ class Creator
 
   generateTextField: (element) ->
     input_type = if element.numeric then 'number' else 'text'
-    panel panelBody(formGroup("<label>#{element.label}</label><input type='#{input_type}' class='form-control' data-fulcrum-field-type='#{element.type}' id='#{element.key}' name='#{element.key}'>"))
+    panel panelBody(formGroup("<label>#{element.label}</label><input type='#{input_type}' class='form-control' data-fulcrum-field-type='#{element.type}' id='#{element.key}' name='#{element.key}'>", null, element.required))
 
   generateDateTimeField: (element) ->
-    panel panelBody(formGroup("<label>#{element.label}</label><input type='date' class='form-control' data-fulcrum-field-type='#{element.type}' id='#{element.key}' name='#{element.key}'>"))
+    panel panelBody(formGroup("<label>#{element.label}</label><input type='date' class='form-control' data-fulcrum-field-type='#{element.type}' id='#{element.key}' name='#{element.key}'>", null, element.required))
 
   generateTimeField: (element) ->
-    panel panelBody(formGroup("<label>#{element.label}</label><input type='time' class='form-control' data-fulcrum-field-type='#{element.type}' id='#{element.key}' name='#{element.key}'>"))
+    panel panelBody(formGroup("<label>#{element.label}</label><input type='time' class='form-control' data-fulcrum-field-type='#{element.type}' id='#{element.key}' name='#{element.key}'>", null, element.required))
 
   generateYesNoField: (element) ->
     buttons = "<a class='btn btn-default yes-no' data-input-id='#{element.key}' data-yes-no-val='#{element.positive.value}' role='button'>#{element.positive.label}</a><a class='btn btn-default yes-no' data-input-id='#{element.key}' data-yes-no-val='#{element.negative.value}' role='button'>#{element.negative.label}</a>"
@@ -135,15 +137,15 @@ class Creator
       buttons += "<a class='btn btn-default yes-no' data-input-id='#{element.key}' data-yes-no-val='#{element.neutral.value}' role='button'>#{element.neutral.label}</a>"
     input = "<input type='hidden' id='#{element.key}' name='#{element.key}'>"
     buttons = "<div class='btn-group btn-group-justified'>#{buttons}</div>"
-    panel panelBody(formGroup("<label>#{element.label}</label>#{buttons}#{input}"))
+    panel panelBody(formGroup("<label>#{element.label}</label>#{buttons}#{input}", null, element.required))
 
   generateHyperlinkField: (element) ->
-    panel panelBody(formGroup("<label>#{element.label}</label><input type='text' class='form-control' data-fulcrum-field-type='#{element.type}' id='#{element.key}' name='#{element.key}'>"))
+    panel panelBody(formGroup("<label>#{element.label}</label><input type='text' class='form-control' data-fulcrum-field-type='#{element.type}' id='#{element.key}' name='#{element.key}'>", null, element.required))
 
   generatePhotoField: (element) ->
     photo_uploader = new PhotoUploader element.key
     @photo_uploaders.push photo_uploader
-    panel panelBody(formGroup("<label>#{element.label}</label><div class='photos' id='#{element.key}'><div class='input'></div><hr><div class='uploads row photo-row'></div></div>", 'photos'))
+    panel panelBody(formGroup("<label>#{element.label}</label><div class='photos' id='#{element.key}'><div class='input'></div><hr><div class='uploads row photo-row'></div></div>", 'photos', element.required))
 
   generateChoiceField: (element) ->
     multiple = if element.multiple then ' multiple' else ''
@@ -151,7 +153,7 @@ class Creator
     for choice in element.choices
       choices.push "<option value='#{choice.value}'>#{choice.label}</option>"
     choices = choices.join ''
-    panel panelBody(formGroup("<label>#{element.label}</label><select class='form-control' data-fulcrum-field-type='#{element.type}' id='#{element.key}' name='#{element.key}'#{multiple}>#{choices}</select>"))
+    panel panelBody(formGroup("<label>#{element.label}</label><select class='form-control' data-fulcrum-field-type='#{element.type}' id='#{element.key}' name='#{element.key}'#{multiple}>#{choices}</select>", null, element.required))
   #
   # /Elements
   #
