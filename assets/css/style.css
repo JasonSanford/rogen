@@ -18,11 +18,11 @@ body {
   height: 100%;
 }
 
-.new-record-modal .new-record-map-container {
+.new-record-modal .new-record-map-container .map {
   height: 150px;
 }
 
-.new-record-modal .new-record-map-container .crosshair {
+.new-record-modal .new-record-map-container .map .crosshair {
   position: absolute;
   width: 65px;
   height: 65px;

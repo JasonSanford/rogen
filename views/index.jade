@@ -36,30 +36,30 @@ block content
           .modal-footer
             button.btn.btn-default(type='button', data-dismiss='modal').
               Close
-    .modal.fade.new-record-modal(role='dialog', id='new-record-modal', tabindex='-1')
-      .modal-dialog
-        .modal-content
-          form(role='form')
-            input(type='hidden', id='latitude', name='latitude')
-            input(type='hidden', id='longitude', name='longitude')
-            .modal-header
-              button(type='button', class='close', data-dismiss='modal')
-                span(aria-hidden='true').
-                  &times;
-                span.sr-only.
-                  Close
-              h4.modal-title(id='myModalLabel').
-                New Record
-            .modal-body
-              .new-record-map-container
-                .crosshair
-              hr
-              .content
-            .modal-footer
-              button.btn.btn-default(type='button', data-dismiss='modal').
-                Cancel
-              button.create.btn.btn-primary(type='submit').
-                Create
+    script(id='new-record-modal-template' type='text/x-template')
+      .modal.fade.new-record-modal(role='dialog', id='new-record-modal', tabindex='-1')
+        .modal-dialog
+          .modal-content
+            form(role='form')
+              input(type='hidden', class='latitude', name='latitude')
+              input(type='hidden', class='longitude', name='longitude')
+              .modal-header
+                button(type='button', class='close', data-dismiss='modal')
+                  span(aria-hidden='true').
+                    &times;
+                  span.sr-only.
+                    Close
+                h4.modal-title(id='myModalLabel').
+                  New Record
+              .modal-body
+                .new-record-map-container
+                hr
+                .content
+              .modal-footer
+                button.btn.btn-default(type='button', data-dismiss='modal').
+                  Cancel
+                button.create.btn.btn-primary(type='submit').
+                  Create
     .modal.fade.saved-record-modal(role='dialog', id='saved-record-modal', tabindex='-1')
       .modal-dialog
         .modal-content

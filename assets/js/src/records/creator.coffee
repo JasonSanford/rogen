@@ -18,17 +18,18 @@ formGroup = (form_group_html, css_class) ->
 
 class Creator
   constructor: (@form, @app) ->
-    @$modal_container    = $('#new-record-modal')
+    @$modal_container    = $($('#new-record-modal-template').html())
     @$map_container      = @$modal_container.find('.new-record-map-container')
     @$html_form          = @$modal_container.find('form')
     @$saved_record_modal = $('#saved-record-modal')
+    @photo_uploaders     = []
+
+    @$map_container.html '<div class="map"><div class="crosshair"></div></div>'
 
     @init()
 
-  photo_uploaders: []
-
   createMap: ->
-    @map = map_utils.createMap @$map_container[0], {zoomControl: false}
+    @map = map_utils.createMap @$map_container.find('.map')[0], {zoomControl: false}
     @map.on 'moveend', @mapMove
 
     locate_control = L.control.locate({follow: true, stopFollowingOnDrag: true, locateOptions: {enableHighAccuracy: true}})
@@ -37,8 +38,8 @@ class Creator
 
   mapMove: =>
     center = @map.getCenter()
-    $('#latitude').val center.lat
-    $('#longitude').val center.lng
+    @$html_form.find('.latitude').val center.lat
+    @$html_form.find('.longitude').val center.lng
 
   formSubmit: ->
     form_obj = @$html_form.serializeObject()
@@ -80,30 +81,29 @@ class Creator
         return
       @app.addRecord record_as_feature
       @$saved_record_modal.modal 'show'
+      @$modal_container.modal 'hide'
       setTimeout =>
         @$saved_record_modal.modal 'hide'
       , 2000
-      @destroy()
     xhr xhr_options, xhr_callback
 
-  initBeforeEvents: ->
+  initEvents: ->
     @$html_form.on 'submit', (event) =>
       event.preventDefault()
       event.stopPropagation()
       @formSubmit()
     @$modal_container.on 'shown.bs.modal', (event) =>
-      # We need to make sure animations are finished before creating the map
       @createMap()
-    #@$modal_container.on 'hide.bs.modal', (event) =>
-    #  @map.remove()
-
-  initAfterEvents: ->
-    $('.yes-no').on 'click', (event) =>
-      event.preventDefault()
-      $button = $(event.target)
-      $button.siblings('a.yes-no').removeClass 'active'
-      $button.addClass 'active'
-      $("##{$button.data('input-id')}").val $button.data('yes-no-val')
+      $('.yes-no').on 'click', (event) =>
+        event.preventDefault()
+        $button = $(event.target)
+        $button.siblings('a.yes-no').removeClass 'active'
+        $button.addClass 'active'
+        $("##{$button.data('input-id')}").val $button.data('yes-no-val')
+      for photo_uploader in @photo_uploaders
+        photo_uploader.init()
+    @$modal_container.on 'hidden.bs.modal', (event) =>
+      @destroy()
 
   #
   # Elements
@@ -171,17 +171,16 @@ class Creator
     @html_content = parts.join ''
 
   init: ->
-    @initBeforeEvents()
+    @initEvents()
     @generateHTMLContent()
     @$modal_container.find('.modal-body').find('.content').html @html_content
     @$modal_container.modal()
-    @initAfterEvents()
-    for photo_uploader in @photo_uploaders
-      photo_uploader.init()
 
   destroy: ->
-    @map.remove()
+    if @map
+      @map.remove()
     @$modal_container.find('.modal-body').find('.content').html ''
+    @$map_container.html ''
     @$modal_container.modal 'hide'
 
 module.exports = Creator

@@ -545,18 +545,18 @@ Creator = (function() {
     this.form = form;
     this.app = app;
     this.mapMove = __bind(this.mapMove, this);
-    this.$modal_container = $('#new-record-modal');
+    this.$modal_container = $($('#new-record-modal-template').html());
     this.$map_container = this.$modal_container.find('.new-record-map-container');
     this.$html_form = this.$modal_container.find('form');
     this.$saved_record_modal = $('#saved-record-modal');
+    this.photo_uploaders = [];
+    this.$map_container.html('<div class="map"><div class="crosshair"></div></div>');
     this.init();
   }
 
-  Creator.prototype.photo_uploaders = [];
-
   Creator.prototype.createMap = function() {
     var locate_control;
-    this.map = map_utils.createMap(this.$map_container[0], {
+    this.map = map_utils.createMap(this.$map_container.find('.map')[0], {
       zoomControl: false
     });
     this.map.on('moveend', this.mapMove);
@@ -574,8 +574,8 @@ Creator = (function() {
   Creator.prototype.mapMove = function() {
     var center;
     center = this.map.getCenter();
-    $('#latitude').val(center.lat);
-    return $('#longitude').val(center.lng);
+    this.$html_form.find('.latitude').val(center.lat);
+    return this.$html_form.find('.longitude').val(center.lng);
   };
 
   Creator.prototype.formSubmit = function() {
@@ -626,16 +626,16 @@ Creator = (function() {
         }
         _this.app.addRecord(record_as_feature);
         _this.$saved_record_modal.modal('show');
-        setTimeout(function() {
+        _this.$modal_container.modal('hide');
+        return setTimeout(function() {
           return _this.$saved_record_modal.modal('hide');
         }, 2000);
-        return _this.destroy();
       };
     })(this);
     return xhr(xhr_options, xhr_callback);
   };
 
-  Creator.prototype.initBeforeEvents = function() {
+  Creator.prototype.initEvents = function() {
     this.$html_form.on('submit', (function(_this) {
       return function(event) {
         event.preventDefault();
@@ -643,22 +643,30 @@ Creator = (function() {
         return _this.formSubmit();
       };
     })(this));
-    return this.$modal_container.on('shown.bs.modal', (function(_this) {
+    this.$modal_container.on('shown.bs.modal', (function(_this) {
       return function(event) {
-        return _this.createMap();
+        var photo_uploader, _i, _len, _ref, _results;
+        _this.createMap();
+        $('.yes-no').on('click', function(event) {
+          var $button;
+          event.preventDefault();
+          $button = $(event.target);
+          $button.siblings('a.yes-no').removeClass('active');
+          $button.addClass('active');
+          return $("#" + ($button.data('input-id'))).val($button.data('yes-no-val'));
+        });
+        _ref = _this.photo_uploaders;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          photo_uploader = _ref[_i];
+          _results.push(photo_uploader.init());
+        }
+        return _results;
       };
     })(this));
-  };
-
-  Creator.prototype.initAfterEvents = function() {
-    return $('.yes-no').on('click', (function(_this) {
+    return this.$modal_container.on('hidden.bs.modal', (function(_this) {
       return function(event) {
-        var $button;
-        event.preventDefault();
-        $button = $(event.target);
-        $button.siblings('a.yes-no').removeClass('active');
-        $button.addClass('active');
-        return $("#" + ($button.data('input-id'))).val($button.data('yes-no-val'));
+        return _this.destroy();
       };
     })(this));
   };
@@ -752,24 +760,18 @@ Creator = (function() {
   };
 
   Creator.prototype.init = function() {
-    var photo_uploader, _i, _len, _ref, _results;
-    this.initBeforeEvents();
+    this.initEvents();
     this.generateHTMLContent();
     this.$modal_container.find('.modal-body').find('.content').html(this.html_content);
-    this.$modal_container.modal();
-    this.initAfterEvents();
-    _ref = this.photo_uploaders;
-    _results = [];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      photo_uploader = _ref[_i];
-      _results.push(photo_uploader.init());
-    }
-    return _results;
+    return this.$modal_container.modal();
   };
 
   Creator.prototype.destroy = function() {
-    this.map.remove();
+    if (this.map) {
+      this.map.remove();
+    }
     this.$modal_container.find('.modal-body').find('.content').html('');
+    this.$map_container.html('');
     return this.$modal_container.modal('hide');
   };
 
