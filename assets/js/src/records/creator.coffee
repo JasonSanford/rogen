@@ -34,7 +34,7 @@ class Creator
     @map = map_utils.createMap @$map_container.find('.map')[0], {zoomControl: false}
     @map.on 'moveend', @mapMove
 
-    locate_control = L.control.locate({follow: true, stopFollowingOnDrag: true, locateOptions: {enableHighAccuracy: true}})
+    locate_control = L.control.locate({follow: true, stopFollowingOnDrag: true})
     locate_control.addTo @map
     locate_control.locate()
 
