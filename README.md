@@ -1,15 +1,15 @@
-## blart
+## rogen
 
 observe and report.
 
-Blart is an app that lets you quickly stand up an app that allows users to create Fulcrum records without authentication or authorization. This can be helpful in emergency response or damage assesment situations where managing users would just get in the way.
+Rogen lets you quickly stand up an app that allows users to create Fulcrum records without authentication or authorization. This can be helpful in emergency response or damage assesment situations where managing users would just get in the way.
 
 ### Development
 
-The server side is built on node.js and writter in CoffeeScript so you'll want to install the necessary dependencies first:
+The server side is built on node.js and written in CoffeeScript so you'll want to install the necessary dependencies first:
 
 ```bash
-cd /path/to/blart
+cd /path/to/rogen
 npm install
 ```
 
@@ -25,7 +25,7 @@ The front-end is also written in CoffeeScript and bundled with Browserify. Use t
 npm run watch
 ```
 
-It's probably best, though, to simply use the dev command to run the seb server and watch the front-end at the same time:
+It's probably best, though, to simply use the dev command to run the web server and watch the front-end at the same time:
 
 ```bash
 npm run dev
@@ -48,7 +48,7 @@ export FULCRUM_FORM_ID=abc-123-def-456
 
 ### Deployment
 
-Blart is easily deployed to Heroku. First create a Heroku app:
+Rogen is easily deployed to Heroku. First create a Heroku app:
 
 ```bash
 heroku create
