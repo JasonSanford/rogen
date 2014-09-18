@@ -14,6 +14,7 @@ router.get '/form', (req, res) ->
     if error
       console.log "Error: #{error}"
       res.send 'Error'
+      return
     res.json form
   fulcrum.forms.find constants.form_id, callback
 
@@ -22,6 +23,7 @@ router.get '/records', (req, res) ->
     if error
       console.log "Error: #{error}"
       res.send 'Error'
+      return
     geojson = recordsToFeatureCollection records
     res.json geojson
   params =
@@ -34,6 +36,7 @@ router.post '/records', (req, res) ->
     if error
       console.log "Error: #{error}"
       res.send String(error), 500
+      return
     record_feature = recordToFeature record.record
     res.json record_feature
   fulcrum.records.create req.body, callback
@@ -53,6 +56,7 @@ router.get '/photos/:photo_id', (req, res) ->
     if error
       console.log "Error: #{error}"
       res.send 'Error'
+      return
     res.json photo
   fulcrum.photos.find req.params.photo_id, callback
 
@@ -61,6 +65,7 @@ router.get '/classification_sets/:classification_set_id', (req, res) ->
     if error
       console.log "Error: #{error}"
       res.send 'Error'
+      return
     res.json classfication_set
   fulcrum.classification_sets.find req.params.classification_set_id, callback
 
