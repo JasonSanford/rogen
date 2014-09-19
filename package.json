@@ -22,6 +22,8 @@
     "request": "~2.42.0"
   },
   "devDependencies": {
-    "coffeeify": "~0.7.0"
+    "coffeeify": "~0.7.0",
+    "watchify": "~1.0.2",
+    "browserify": "~5.11.2"
   }
 }
