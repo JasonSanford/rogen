@@ -51,6 +51,16 @@ router.post '/photos', (req, res) ->
   req.pipe(fulcrum_req)
   fulcrum_req.pipe(res)
 
+router.post '/videos', (req, res) ->
+  fulcrum_req = request('https://api.fulcrumapp.com/api/v2/videos/upload')
+  fulcrum_req_headers =
+    'X-ApiToken': constants.api_key
+    'Accept': 'application/json'
+  utils.extend fulcrum_req.headers, fulcrum_req_headers
+  delete fulcrum_req.headers.cookie
+  req.pipe(fulcrum_req)
+  fulcrum_req.pipe(res)
+
 router.get '/photos/:photo_id', (req, res) ->
   callback = (error, photo) ->
     if error
@@ -59,6 +69,15 @@ router.get '/photos/:photo_id', (req, res) ->
       return
     res.json photo
   fulcrum.photos.find req.params.photo_id, callback
+
+router.get '/videos/:video_id', (req, res) ->
+  callback = (error, video) ->
+    if error
+      console.log "Error: #{error}"
+      res.send 'Error'
+      return
+    res.json video
+  fulcrum.videos.find req.params.video_id, callback
 
 router.get '/classification_sets/:classification_set_id', (req, res) ->
   callback = (error, classfication_set) ->

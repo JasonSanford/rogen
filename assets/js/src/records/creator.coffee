@@ -2,6 +2,7 @@ xhr  = require 'xhr'
 
 map_utils     = require '../map_utils'
 PhotoUploader = require '../photo_uploader'
+VideoUploader = require '../video_uploader'
 
 panelBody = (panel_body_html) ->
   "<div class='panel-body'>#{panel_body_html}</div>"
@@ -25,6 +26,7 @@ class Creator
     @$html_form          = @$modal_container.find('form')
     @$saved_record_modal = $('#saved-record-modal')
     @photo_uploaders     = []
+    @video_uploaders     = []
 
     @$map_container.html '<div class="map"><div class="crosshair"></div></div>'
 
@@ -66,6 +68,10 @@ class Creator
       if photo_uploader.photoCount() > 0
         form_obj[photo_uploader.field_key] = photo_uploader.asJSON()
 
+    for video_uploader in @video_uploaders
+      if video_uploader.videoCount() > 0
+        form_obj[video_uploader.field_key] = video_uploader.asJSON()
+
     record =
       latitude: latitude
       longitude: longitude
@@ -104,6 +110,8 @@ class Creator
         $("##{$button.data('input-id')}").val $button.data('yes-no-val')
       for photo_uploader in @photo_uploaders
         photo_uploader.init()
+      for video_uploader in @video_uploaders
+        video_uploader.init()
     @$modal_container.on 'hidden.bs.modal', (event) =>
       @destroy()
 
@@ -146,6 +154,11 @@ class Creator
     photo_uploader = new PhotoUploader element.key
     @photo_uploaders.push photo_uploader
     panel panelBody(formGroup("<label>#{element.label}</label><div class='photos' id='#{element.key}'><div class='input'></div><hr><div class='uploads row photo-row'></div></div>", 'photos', element.required))
+
+  generateVideoField: (element) ->
+    video_uploader = new VideoUploader element.key
+    @video_uploaders.push video_uploader
+    panel panelBody(formGroup("<label>#{element.label}</label><div class='videos' id='#{element.key}'><div class='input'></div><hr><div class='uploads row video-row'></div></div>", 'videos', element.required))
 
   generateChoiceField: (element) ->
     multiple = if element.multiple then ' multiple' else ''

@@ -125,7 +125,7 @@ module.exports = Form;
 
 
 
-},{"./classification_set":1,"xhr":16}],3:[function(require,module,exports){
+},{"./classification_set":1,"xhr":17}],3:[function(require,module,exports){
 var getForm, xhr;
 
 xhr = require('xhr');
@@ -152,7 +152,7 @@ module.exports = {
 
 
 
-},{"xhr":16}],4:[function(require,module,exports){
+},{"xhr":17}],4:[function(require,module,exports){
 var App, Form, Record, RecordCreator, RecordViewer, app, async, form_utils, map_utils, record_utils,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -285,7 +285,7 @@ app.init();
 
 
 
-},{"./form":2,"./form_utils":3,"./map_utils":5,"./record":9,"./records/creator":10,"./records/utils":11,"./records/viewer":12,"async":14}],5:[function(require,module,exports){
+},{"./form":2,"./form_utils":3,"./map_utils":5,"./record":9,"./records/creator":10,"./records/utils":11,"./records/viewer":12,"async":15}],5:[function(require,module,exports){
 var createGeoJSONLayer, createMap, layer_configs, utils;
 
 layer_configs = require('./layer_configs');
@@ -398,7 +398,7 @@ module.exports = PhotoDisplay;
 
 
 
-},{"xhr":16}],8:[function(require,module,exports){
+},{"xhr":17}],8:[function(require,module,exports){
 var PhotoUploader, uuid, xhr;
 
 uuid = require('node-uuid');
@@ -489,7 +489,7 @@ module.exports = PhotoUploader;
 
 
 
-},{"node-uuid":15,"xhr":16}],9:[function(require,module,exports){
+},{"node-uuid":16,"xhr":17}],9:[function(require,module,exports){
 var Record;
 
 Record = (function() {
@@ -517,7 +517,7 @@ module.exports = Record;
 
 
 },{}],10:[function(require,module,exports){
-var Creator, PhotoUploader, form, formGroup, map_utils, panel, panelBody, xhr,
+var Creator, PhotoUploader, VideoUploader, form, formGroup, map_utils, panel, panelBody, xhr,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 xhr = require('xhr');
@@ -525,6 +525,8 @@ xhr = require('xhr');
 map_utils = require('../map_utils');
 
 PhotoUploader = require('../photo_uploader');
+
+VideoUploader = require('../video_uploader');
 
 panelBody = function(panel_body_html) {
   return "<div class='panel-body'>" + panel_body_html + "</div>";
@@ -556,6 +558,7 @@ Creator = (function() {
     this.$html_form = this.$modal_container.find('form');
     this.$saved_record_modal = $('#saved-record-modal');
     this.photo_uploaders = [];
+    this.video_uploaders = [];
     this.$map_container.html('<div class="map"><div class="crosshair"></div></div>');
     this.init();
   }
@@ -582,7 +585,7 @@ Creator = (function() {
   };
 
   Creator.prototype.formSubmit = function() {
-    var choice_field_key, choice_field_keys, data, form_obj, latitude, longitude, photo_uploader, record, value_or_values, xhr_callback, xhr_options, _i, _j, _len, _len1, _ref;
+    var choice_field_key, choice_field_keys, data, form_obj, latitude, longitude, photo_uploader, record, value_or_values, video_uploader, xhr_callback, xhr_options, _i, _j, _k, _len, _len1, _len2, _ref, _ref1;
     form_obj = this.$html_form.serializeObject();
     latitude = parseFloat(form_obj.latitude);
     longitude = parseFloat(form_obj.longitude);
@@ -605,6 +608,13 @@ Creator = (function() {
       photo_uploader = _ref[_j];
       if (photo_uploader.photoCount() > 0) {
         form_obj[photo_uploader.field_key] = photo_uploader.asJSON();
+      }
+    }
+    _ref1 = this.video_uploaders;
+    for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
+      video_uploader = _ref1[_k];
+      if (video_uploader.videoCount() > 0) {
+        form_obj[video_uploader.field_key] = video_uploader.asJSON();
       }
     }
     record = {
@@ -648,7 +658,7 @@ Creator = (function() {
     })(this));
     this.$modal_container.on('shown.bs.modal', (function(_this) {
       return function(event) {
-        var photo_uploader, _i, _len, _ref, _results;
+        var photo_uploader, video_uploader, _i, _j, _len, _len1, _ref, _ref1, _results;
         _this.createMap();
         $('.yes-no').on('click', function(event) {
           var $button;
@@ -659,10 +669,15 @@ Creator = (function() {
           return $("#" + ($button.data('input-id'))).val($button.data('yes-no-val'));
         });
         _ref = _this.photo_uploaders;
-        _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           photo_uploader = _ref[_i];
-          _results.push(photo_uploader.init());
+          photo_uploader.init();
+        }
+        _ref1 = _this.video_uploaders;
+        _results = [];
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          video_uploader = _ref1[_j];
+          _results.push(video_uploader.init());
         }
         return _results;
       };
@@ -727,6 +742,13 @@ Creator = (function() {
     return panel(panelBody(formGroup("<label>" + element.label + "</label><div class='photos' id='" + element.key + "'><div class='input'></div><hr><div class='uploads row photo-row'></div></div>", 'photos', element.required)));
   };
 
+  Creator.prototype.generateVideoField = function(element) {
+    var video_uploader;
+    video_uploader = new VideoUploader(element.key);
+    this.video_uploaders.push(video_uploader);
+    return panel(panelBody(formGroup("<label>" + element.label + "</label><div class='videos' id='" + element.key + "'><div class='input'></div><hr><div class='uploads row video-row'></div></div>", 'videos', element.required)));
+  };
+
   Creator.prototype.generateChoiceField = function(element) {
     var choice, choices, multiple, _i, _len, _ref;
     multiple = element.multiple ? ' multiple' : '';
@@ -786,7 +808,7 @@ module.exports = Creator;
 
 
 
-},{"../map_utils":5,"../photo_uploader":8,"xhr":16}],11:[function(require,module,exports){
+},{"../map_utils":5,"../photo_uploader":8,"../video_uploader":14,"xhr":17}],11:[function(require,module,exports){
 var getRecords, xhr;
 
 xhr = require('xhr');
@@ -813,7 +835,7 @@ module.exports = {
 
 
 
-},{"xhr":16}],12:[function(require,module,exports){
+},{"xhr":17}],12:[function(require,module,exports){
 var PhotoDisplay, Viewer, panel, panelBody;
 
 PhotoDisplay = require('../photo_display');
@@ -1040,6 +1062,97 @@ module.exports = {
 
 
 },{}],14:[function(require,module,exports){
+var VideoUploader, uuid, xhr;
+
+uuid = require('node-uuid');
+
+xhr = require('xhr');
+
+VideoUploader = (function() {
+  function VideoUploader(field_key) {
+    this.field_key = field_key;
+  }
+
+  VideoUploader.prototype.videoFormData = function() {
+    var attrs;
+    attrs = {
+      name: "video[access_key]",
+      value: uuid.v4()
+    };
+    return [attrs];
+  };
+
+  VideoUploader.prototype.videoCount = function() {
+    return this.$uploads.find('.video').length;
+  };
+
+  VideoUploader.prototype.init = function() {
+    this.$container = $("#" + this.field_key);
+    this.$input_container = this.$container.find('.input');
+    this.$uploads = this.$container.find('.uploads');
+    return this.generateNewInput();
+  };
+
+  VideoUploader.prototype.renderVideo = function(video_data) {
+    var access_key, html, thumbnail_url;
+    thumbnail_url = video_data.thumbnail_small_square;
+    access_key = video_data.access_key;
+    html = "<div class='thumbnail video col-xs-6 col-md-3' data-access-key='" + access_key + "'><img src='" + thumbnail_url + "' /><input type='text' placeholder='Caption (optional)' class='caption form-control'></div>";
+    return this.$uploads.append(html);
+  };
+
+  VideoUploader.prototype.generateNewInput = function() {
+    var $add_video_link, $input, $progress, $progress_bar;
+    this.$input_container.html("");
+    this.$input_container.html("<div class='add-video'><input type='file' accept='video/*;capture=camera' class='form-control video_upload' name='video[file]'><a href='#add_video'><i class='glyphicon glyphicon-plus'></i>Add video</a><div class='progress' style='display: none;'><div class='progress-bar' role='progressbar' style='width: 0%;'></div></div></div>");
+    $input = this.$input_container.find('.video_upload');
+    $progress = this.$input_container.find('.progress');
+    $progress_bar = this.$input_container.find('.progress-bar');
+    $input.bind('fileuploadprogress', function(e, data) {
+      var progress;
+      progress = parseInt(data.loaded / data.total * 100, 10);
+      $progress.show();
+      return $progress_bar.css('width', "" + progress + "%");
+    });
+    $input.fileupload({
+      url: '/api/videos',
+      dataType: 'json',
+      formData: this.videoFormData(),
+      paramName: 'video[file]',
+      done: (function(_this) {
+        return function(e, data) {
+          _this.renderVideo(data.result.video);
+          return _this.generateNewInput();
+        };
+      })(this)
+    });
+    $add_video_link = $input.siblings('a');
+    return $add_video_link.on('click', function(event) {
+      event.preventDefault();
+      return $input.trigger('click');
+    });
+  };
+
+  VideoUploader.prototype.asJSON = function() {
+    return this.$uploads.find('.video').map(function(i, video) {
+      var $video;
+      $video = $(video);
+      return {
+        video_id: $video.data('access-key'),
+        caption: $video.find('.caption').val() || ''
+      };
+    }).get();
+  };
+
+  return VideoUploader;
+
+})();
+
+module.exports = VideoUploader;
+
+
+
+},{"node-uuid":16,"xhr":17}],15:[function(require,module,exports){
 (function (process){
 /*!
  * async
@@ -2166,7 +2279,7 @@ module.exports = {
 }());
 
 }).call(this,require("UPikzY"))
-},{"UPikzY":40}],15:[function(require,module,exports){
+},{"UPikzY":41}],16:[function(require,module,exports){
 (function (Buffer){
 //     uuid.js
 //
@@ -2415,7 +2528,7 @@ module.exports = {
 }).call(this);
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":23,"crypto":29}],16:[function(require,module,exports){
+},{"buffer":24,"crypto":30}],17:[function(require,module,exports){
 var window = require("global/window")
 var once = require("once")
 var parseHeaders = require('parse-headers')
@@ -2587,7 +2700,7 @@ function createXHR(options, callback) {
 
 function noop() {}
 
-},{"global/window":17,"once":18,"parse-headers":22}],17:[function(require,module,exports){
+},{"global/window":18,"once":19,"parse-headers":23}],18:[function(require,module,exports){
 (function (global){
 if (typeof window !== "undefined") {
     module.exports = window
@@ -2598,7 +2711,7 @@ if (typeof window !== "undefined") {
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 module.exports = once
 
 once.proto = once(function () {
@@ -2619,7 +2732,7 @@ function once (fn) {
   }
 }
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var isFunction = require('is-function')
 
 module.exports = forEach
@@ -2667,7 +2780,7 @@ function forEachObject(object, iterator, context) {
     }
 }
 
-},{"is-function":20}],20:[function(require,module,exports){
+},{"is-function":21}],21:[function(require,module,exports){
 module.exports = isFunction
 
 var toString = Object.prototype.toString
@@ -2684,7 +2797,7 @@ function isFunction (fn) {
       fn === window.prompt))
 };
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 
 exports = module.exports = trim;
 
@@ -2700,7 +2813,7 @@ exports.right = function(str){
   return str.replace(/\s*$/, '');
 };
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var trim = require('trim')
   , forEach = require('for-each')
 
@@ -2722,7 +2835,7 @@ module.exports = function (headers) {
 
   return result
 }
-},{"for-each":19,"trim":21}],23:[function(require,module,exports){
+},{"for-each":20,"trim":22}],24:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -3880,7 +3993,7 @@ function assert (test, message) {
   if (!test) throw new Error(message || 'Failed assertion')
 }
 
-},{"base64-js":24,"ieee754":25}],24:[function(require,module,exports){
+},{"base64-js":25,"ieee754":26}],25:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -4002,7 +4115,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	exports.fromByteArray = uint8ToBase64
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -4088,7 +4201,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 (function (Buffer){
 var createHash = require('sha.js')
 
@@ -4122,7 +4235,7 @@ module.exports = function (alg) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./md5":30,"buffer":23,"ripemd160":31,"sha.js":33}],27:[function(require,module,exports){
+},{"./md5":31,"buffer":24,"ripemd160":32,"sha.js":34}],28:[function(require,module,exports){
 (function (Buffer){
 var createHash = require('./create-hash')
 
@@ -4167,7 +4280,7 @@ Hmac.prototype.digest = function (enc) {
 
 
 }).call(this,require("buffer").Buffer)
-},{"./create-hash":26,"buffer":23}],28:[function(require,module,exports){
+},{"./create-hash":27,"buffer":24}],29:[function(require,module,exports){
 (function (Buffer){
 var intSize = 4;
 var zeroBuffer = new Buffer(intSize); zeroBuffer.fill(0);
@@ -4205,7 +4318,7 @@ function hash(buf, fn, hashSize, bigEndian) {
 module.exports = { hash: hash };
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":23}],29:[function(require,module,exports){
+},{"buffer":24}],30:[function(require,module,exports){
 (function (Buffer){
 var rng = require('./rng')
 
@@ -4263,7 +4376,7 @@ each(['createCredentials'
 })
 
 }).call(this,require("buffer").Buffer)
-},{"./create-hash":26,"./create-hmac":27,"./pbkdf2":37,"./rng":38,"buffer":23}],30:[function(require,module,exports){
+},{"./create-hash":27,"./create-hmac":28,"./pbkdf2":38,"./rng":39,"buffer":24}],31:[function(require,module,exports){
 /*
  * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
  * Digest Algorithm, as defined in RFC 1321.
@@ -4420,7 +4533,7 @@ module.exports = function md5(buf) {
   return helpers.hash(buf, core_md5, 16);
 };
 
-},{"./helpers":28}],31:[function(require,module,exports){
+},{"./helpers":29}],32:[function(require,module,exports){
 (function (Buffer){
 
 module.exports = ripemd160
@@ -4629,7 +4742,7 @@ function ripemd160(message) {
 
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":23}],32:[function(require,module,exports){
+},{"buffer":24}],33:[function(require,module,exports){
 var u = require('./util')
 var write = u.write
 var fill = u.zeroFill
@@ -4729,7 +4842,7 @@ module.exports = function (Buffer) {
   return Hash
 }
 
-},{"./util":36}],33:[function(require,module,exports){
+},{"./util":37}],34:[function(require,module,exports){
 var exports = module.exports = function (alg) {
   var Alg = exports[alg]
   if(!Alg) throw new Error(alg + ' is not supported (we accept pull requests)')
@@ -4743,7 +4856,7 @@ exports.sha =
 exports.sha1 = require('./sha1')(Buffer, Hash)
 exports.sha256 = require('./sha256')(Buffer, Hash)
 
-},{"./hash":32,"./sha1":34,"./sha256":35,"buffer":23}],34:[function(require,module,exports){
+},{"./hash":33,"./sha1":35,"./sha256":36,"buffer":24}],35:[function(require,module,exports){
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
  * in FIPS PUB 180-1
@@ -4904,7 +5017,7 @@ module.exports = function (Buffer, Hash) {
   return Sha1
 }
 
-},{"util":42}],35:[function(require,module,exports){
+},{"util":43}],36:[function(require,module,exports){
 
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
@@ -5069,7 +5182,7 @@ module.exports = function (Buffer, Hash) {
 
 }
 
-},{"./util":36,"util":42}],36:[function(require,module,exports){
+},{"./util":37,"util":43}],37:[function(require,module,exports){
 exports.write = write
 exports.zeroFill = zeroFill
 
@@ -5107,7 +5220,7 @@ function zeroFill(buf, from) {
 }
 
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 (function (Buffer){
 // JavaScript PBKDF2 Implementation
 // Based on http://git.io/qsv2zw
@@ -5193,7 +5306,7 @@ module.exports = function (createHmac, exports) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":23}],38:[function(require,module,exports){
+},{"buffer":24}],39:[function(require,module,exports){
 (function (Buffer){
 // Original code adapted from Robert Kieffer.
 // details at https://github.com/broofa/node-uuid
@@ -5230,7 +5343,7 @@ module.exports = function (createHmac, exports) {
 }())
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":23}],39:[function(require,module,exports){
+},{"buffer":24}],40:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -5255,7 +5368,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -5320,14 +5433,14 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -5917,4 +6030,4 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require("UPikzY"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":41,"UPikzY":40,"inherits":39}]},{},[4])
+},{"./support/isBuffer":42,"UPikzY":41,"inherits":40}]},{},[4])
