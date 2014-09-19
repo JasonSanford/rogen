@@ -6,6 +6,8 @@ observe and report.
 
 Rogen lets you quickly stand up an app that allows users to create Fulcrum records without authentication or authorization. This can be helpful in emergency response or damage assesment situations where managing users would just get in the way. Creating a data collection app is as simple as providing a Fulcrum API key and form id. All record creation form inputs are automatically set to their proper HTML form equivalents, including photos.
 
+See an example app running at http://rogen.herokuapp.com/
+
 Setting Location
 
 ![Setting Location](https://dl.dropboxusercontent.com/u/10994537/Screenshot_2014-09-17-21-06-41.png)
