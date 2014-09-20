@@ -100,7 +100,7 @@ body {
   padding: 0;
 }
 
-.new-record-modal .add-photo input, .new-record-modal .add-video input {
+.new-record-modal .add-media input {
   opacity: .001;
   position: relative;
   z-index: 30;

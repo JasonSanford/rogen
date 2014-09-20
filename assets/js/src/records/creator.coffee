@@ -1,8 +1,8 @@
 xhr  = require 'xhr'
 
 map_utils     = require '../map_utils'
-PhotoUploader = require '../photo_uploader'
-VideoUploader = require '../video_uploader'
+PhotoUploader = require '../uploaders/photo'
+VideoUploader = require '../uploaders/video'
 
 panelBody = (panel_body_html) ->
   "<div class='panel-body'>#{panel_body_html}</div>"
@@ -65,11 +65,11 @@ class Creator
           other_values: []
 
     for photo_uploader in @photo_uploaders
-      if photo_uploader.photoCount() > 0
+      if photo_uploader.mediaCount() > 0
         form_obj[photo_uploader.field_key] = photo_uploader.asJSON()
 
     for video_uploader in @video_uploaders
-      if video_uploader.videoCount() > 0
+      if video_uploader.mediaCount() > 0
         form_obj[video_uploader.field_key] = video_uploader.asJSON()
 
     record =
