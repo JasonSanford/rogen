@@ -153,12 +153,12 @@ class Creator
   generatePhotoField: (element) ->
     photo_uploader = new PhotoUploader element.key
     @photo_uploaders.push photo_uploader
-    panel panelBody(formGroup("<label>#{element.label}</label><div class='photos' id='#{element.key}'><div class='input'></div><hr><div class='uploads row photo-row'></div></div>", 'photos', element.required))
+    panel panelBody(formGroup("<label>#{element.label}</label><div class='photos' id='#{element.key}'><div class='input'></div><hr><div class='uploads row media-row'></div></div>", 'media', element.required))
 
   generateVideoField: (element) ->
     video_uploader = new VideoUploader element.key
     @video_uploaders.push video_uploader
-    panel panelBody(formGroup("<label>#{element.label}</label><div class='videos' id='#{element.key}'><div class='input'></div><hr><div class='uploads row video-row'></div></div>", 'videos', element.required))
+    panel panelBody(formGroup("<label>#{element.label}</label><div class='videos' id='#{element.key}'><div class='input'></div><hr><div class='uploads row media-row'></div></div>", 'media', element.required))
 
   generateChoiceField: (element) ->
     multiple = if element.multiple then ' multiple' else ''

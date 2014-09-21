@@ -70,7 +70,7 @@ class Viewer
   generatePhotoField: (element) ->
     photos_html_parts = []
     if @record.record_geojson.properties[element.key]
-      photos_html_parts.push '<div class="row photo-row">'
+      photos_html_parts.push '<div class="row media-row">'
       for photo in @record.record_geojson.properties[element.key]
         photos_html_parts.push "<div class='thumbnail col-xs-6 col-md-3' id='photo-#{photo.photo_id}'></div>"
         caption = photo.caption or '&nbsp;'
@@ -81,7 +81,7 @@ class Viewer
   generateVideoField: (element) ->
     videos_html_parts = []
     if @record.record_geojson.properties[element.key]
-      videos_html_parts.push '<div class="row video-row">'
+      videos_html_parts.push '<div class="row media-row">'
       for video in @record.record_geojson.properties[element.key]
         videos_html_parts.push "<div class='thumbnail col-xs-6 col-md-3' id='video-#{video.video_id}'></div>"
         caption = video.caption or '&nbsp;'

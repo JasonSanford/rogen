@@ -648,14 +648,14 @@ Creator = (function() {
     var photo_uploader;
     photo_uploader = new PhotoUploader(element.key);
     this.photo_uploaders.push(photo_uploader);
-    return panel(panelBody(formGroup("<label>" + element.label + "</label><div class='photos' id='" + element.key + "'><div class='input'></div><hr><div class='uploads row photo-row'></div></div>", 'photos', element.required)));
+    return panel(panelBody(formGroup("<label>" + element.label + "</label><div class='photos' id='" + element.key + "'><div class='input'></div><hr><div class='uploads row media-row'></div></div>", 'media', element.required)));
   };
 
   Creator.prototype.generateVideoField = function(element) {
     var video_uploader;
     video_uploader = new VideoUploader(element.key);
     this.video_uploaders.push(video_uploader);
-    return panel(panelBody(formGroup("<label>" + element.label + "</label><div class='videos' id='" + element.key + "'><div class='input'></div><hr><div class='uploads row video-row'></div></div>", 'videos', element.required)));
+    return panel(panelBody(formGroup("<label>" + element.label + "</label><div class='videos' id='" + element.key + "'><div class='input'></div><hr><div class='uploads row media-row'></div></div>", 'media', element.required)));
   };
 
   Creator.prototype.generateChoiceField = function(element) {
@@ -853,7 +853,7 @@ Viewer = (function() {
     var caption, photo, photos_html_parts, _i, _len, _ref;
     photos_html_parts = [];
     if (this.record.record_geojson.properties[element.key]) {
-      photos_html_parts.push('<div class="row photo-row">');
+      photos_html_parts.push('<div class="row media-row">');
       _ref = this.record.record_geojson.properties[element.key];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         photo = _ref[_i];
@@ -870,7 +870,7 @@ Viewer = (function() {
     var caption, video, videos_html_parts, _i, _len, _ref;
     videos_html_parts = [];
     if (this.record.record_geojson.properties[element.key]) {
-      videos_html_parts.push('<div class="row video-row">');
+      videos_html_parts.push('<div class="row media-row">');
       _ref = this.record.record_geojson.properties[element.key];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         video = _ref[_i];
