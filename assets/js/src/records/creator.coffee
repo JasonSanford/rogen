@@ -1,7 +1,8 @@
 xhr  = require 'xhr'
 
 map_utils     = require '../map_utils'
-PhotoUploader = require '../photo_uploader'
+PhotoUploader = require '../uploaders/photo'
+VideoUploader = require '../uploaders/video'
 
 panelBody = (panel_body_html) ->
   "<div class='panel-body'>#{panel_body_html}</div>"
@@ -25,6 +26,7 @@ class Creator
     @$html_form          = @$modal_container.find('form')
     @$saved_record_modal = $('#saved-record-modal')
     @photo_uploaders     = []
+    @video_uploaders     = []
 
     @$map_container.html '<div class="map"><div class="crosshair"></div></div>'
 
@@ -63,8 +65,12 @@ class Creator
           other_values: []
 
     for photo_uploader in @photo_uploaders
-      if photo_uploader.photoCount() > 0
+      if photo_uploader.mediaCount() > 0
         form_obj[photo_uploader.field_key] = photo_uploader.asJSON()
+
+    for video_uploader in @video_uploaders
+      if video_uploader.mediaCount() > 0
+        form_obj[video_uploader.field_key] = video_uploader.asJSON()
 
     record =
       latitude: latitude
@@ -104,6 +110,8 @@ class Creator
         $("##{$button.data('input-id')}").val $button.data('yes-no-val')
       for photo_uploader in @photo_uploaders
         photo_uploader.init()
+      for video_uploader in @video_uploaders
+        video_uploader.init()
     @$modal_container.on 'hidden.bs.modal', (event) =>
       @destroy()
 
@@ -145,7 +153,12 @@ class Creator
   generatePhotoField: (element) ->
     photo_uploader = new PhotoUploader element.key
     @photo_uploaders.push photo_uploader
-    panel panelBody(formGroup("<label>#{element.label}</label><div class='photos' id='#{element.key}'><div class='input'></div><hr><div class='uploads row photo-row'></div></div>", 'photos', element.required))
+    panel panelBody(formGroup("<label>#{element.label}</label><div class='photos' id='#{element.key}'><div class='input'></div><hr><div class='uploads row media-row'></div></div>", 'media', element.required))
+
+  generateVideoField: (element) ->
+    video_uploader = new VideoUploader element.key
+    @video_uploaders.push video_uploader
+    panel panelBody(formGroup("<label>#{element.label}</label><div class='videos' id='#{element.key}'><div class='input'></div><hr><div class='uploads row media-row'></div></div>", 'media', element.required))
 
   generateChoiceField: (element) ->
     multiple = if element.multiple then ' multiple' else ''

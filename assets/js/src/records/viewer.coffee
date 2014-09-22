@@ -1,4 +1,5 @@
 PhotoDisplay = require '../photo_display'
+VideoDisplay = require '../video_display'
 
 panel = (panel_html, css_class) ->
   css_class = if css_class then " #{css_class}" else ''
@@ -13,6 +14,7 @@ class Viewer
     @init()
 
   photo_displays: []
+  video_displays: []
 
   generateChoiceField: (element) ->
     if choice_values = @record.record_geojson.properties[element.key]
@@ -68,13 +70,24 @@ class Viewer
   generatePhotoField: (element) ->
     photos_html_parts = []
     if @record.record_geojson.properties[element.key]
-      photos_html_parts.push '<div class="row photo-row">'
+      photos_html_parts.push '<div class="row media-row">'
       for photo in @record.record_geojson.properties[element.key]
         photos_html_parts.push "<div class='thumbnail col-xs-6 col-md-3' id='photo-#{photo.photo_id}'></div>"
         caption = photo.caption or '&nbsp;'
         @photo_displays.push new PhotoDisplay(photo, caption)
       photos_html_parts.push '</div>'
     panel "<div class='panel-heading'><h3 class='panel-title'>#{element.label}</h3></div>#{panelBody(photos_html_parts.join '')}", 'photos'
+
+  generateVideoField: (element) ->
+    videos_html_parts = []
+    if @record.record_geojson.properties[element.key]
+      videos_html_parts.push '<div class="row media-row">'
+      for video in @record.record_geojson.properties[element.key]
+        videos_html_parts.push "<div class='thumbnail col-xs-6 col-md-3' id='video-#{video.video_id}'></div>"
+        caption = video.caption or '&nbsp;'
+        @video_displays.push new VideoDisplay(video, caption)
+      videos_html_parts.push '</div>'
+    panel "<div class='panel-heading'><h3 class='panel-title'>#{element.label}</h3></div>#{panelBody(videos_html_parts.join '')}", 'videos'
 
   generateTextField: (element) ->
     if @record.record_geojson.properties[element.key]
@@ -129,5 +142,7 @@ class Viewer
     @$modal_container.modal()
     for photo_display in @photo_displays
       photo_display.render()
+    for video_display in @video_displays
+      video_display.render()
 
 module.exports = Viewer
