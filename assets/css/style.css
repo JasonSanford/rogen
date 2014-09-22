@@ -75,6 +75,14 @@ body {
   width: 200px;
 }
 
+.new-record-modal .media-row .thumbnail .glyphicon {
+  color: rgba(51, 51, 51, 0.4);
+  display: block;
+  text-align: center;
+  font-size: 60px;
+  margin: 67px 0;
+}
+
 .new-record-modal .media-row .thumbnail input {
   margin-top: 5px;
 }

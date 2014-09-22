@@ -1124,6 +1124,13 @@ Video = (function(_super) {
 
   Video.prototype.media_accept = 'video/*';
 
+  Video.prototype.renderMedia = function(media_data) {
+    var access_key, html;
+    access_key = media_data.access_key;
+    html = "<div class='thumbnail media col-xs-6 col-md-3' data-access-key='" + access_key + "'><i class='glyphicon glyphicon-facetime-video'></i><input type='text' placeholder='Caption (optional)' class='caption form-control'></div>";
+    return this.$uploads.append(html);
+  };
+
   return Video;
 
 })(Base);
