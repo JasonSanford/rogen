@@ -11,8 +11,8 @@ class Video extends Base
   # Show placeholder image instead.
   #
   renderMedia: (media_data) ->
-    access_key    = media_data.access_key
-    html = "<div class='thumbnail media col-xs-6 col-md-3' data-access-key='#{access_key}'><i class='glyphicon glyphicon-facetime-video'></i><input type='text' placeholder='Caption (optional)' class='caption form-control'></div>"
+    access_key = media_data.access_key
+    html       = "<div class='thumbnail media col-xs-6 col-md-3' data-access-key='#{access_key}'><i class='glyphicon glyphicon-facetime-video'></i><input type='text' placeholder='Caption (optional)' class='caption form-control'></div>"
     @$uploads.append html
 
 module.exports = Video
