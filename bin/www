@@ -1,6 +1,6 @@
 #!/usr/bin/env coffee
 debug = require('debug')('rogen')
-app   = require '../app'
+app   = require '../app.coffee'
 
 app.set 'port', Number(process.env.PORT) || 5000
 
