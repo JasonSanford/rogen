@@ -62,7 +62,18 @@ export FULCRUM_API_KEY=super_long_string_that_is_a_secret
 export FULCRUM_FORM_ID=abc-123-def-456
 ```
 
-### Deployment
+### Deployment - the easy way
+
+Click the button below to automatically launch a Rogen instance and start collecting data for your Fulcrum app in minutes.
+
+**Note** - You'll need to have a few configuration variables ready before starting:
+
+* Fulcrum API key - You can find this in your settings within Fulcrum. Click the "API Key" navigation item.
+* Fulcrum form (app) id - You can get this by looking in your URL when viewing an App Dashboard page. It will be a long string of letters, numbers and dashes. Something like `5125308f-070a-4a51-8c04-fec0bb4d23b7`
+
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy?template=https://github.com/JasonSanford/rogen)
+
+### Deployment - the harder way
 
 Rogen is easily deployed to Heroku. First create a Heroku app:
 

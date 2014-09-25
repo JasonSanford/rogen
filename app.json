@@ -1,0 +1,15 @@
+{
+  "name": "Rogen",
+  "description": "Create and read fulcrum records with minimal configuration",
+  "website": "https://github.com/JasonSanford/rogen",
+  "repository": "https://github.com/JasonSanford/rogen",
+  "logo": "http://fulcrumapp.com/assets/img/icons/apple-touch-icon-144x144.png",
+  "env": {
+    "FULCRUM_API_KEY": {
+      "description": "The Fulcrum API key is needed to authenticate with the API."
+    },
+    "FULCRUM_FORM_ID": {
+      "description": "The Fulcrum form (app) id for which you want to collect data."
+    }
+  }
+}
