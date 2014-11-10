@@ -661,7 +661,7 @@ Creator = (function() {
   Creator.prototype.generateChoiceField = function(element) {
     var choice, choices, multiple, _i, _len, _ref;
     multiple = element.multiple ? ' multiple' : '';
-    choices = [];
+    choices = ['<option value=""></option>'];
     _ref = element.choices;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       choice = _ref[_i];

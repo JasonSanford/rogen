@@ -162,7 +162,7 @@ class Creator
 
   generateChoiceField: (element) ->
     multiple = if element.multiple then ' multiple' else ''
-    choices = []
+    choices = ['<option value=""></option>']
     for choice in element.choices
       choices.push "<option value='#{choice.value}'>#{choice.label}</option>"
     choices = choices.join ''
