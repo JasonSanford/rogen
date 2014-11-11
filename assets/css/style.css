@@ -96,6 +96,11 @@ body {
   color:red;
 }
 
+.new-record-modal .other_input {
+  display: none;
+  margin-top: 5px;
+}
+
 /* Inner panels */
 .record-modal .panel .panel:not(.media), .new-record-modal .panel .panel:not(.media) {
   border: none;

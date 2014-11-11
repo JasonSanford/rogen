@@ -42,6 +42,18 @@ class Form
         Array::push.apply keys, section_keys
     keys
 
+  choiceFieldAllowOtherKeys: (iteratable) ->
+    keys = []
+    _iteratable = iteratable or @form_obj.elements
+    for element in _iteratable
+      # TODO: Support multiple choice with other
+      if element.type is 'ChoiceField' and element.allow_other and not element.multiple
+        keys.push element.key
+      else if element.type is 'Section'
+        section_keys = @choiceFieldKeys element.elements
+        Array::push.apply keys, section_keys
+    keys
+
   name: ->
     @form_obj.name
 

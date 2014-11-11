@@ -53,16 +53,22 @@ class Creator
     delete form_obj.latitude
     delete form_obj.longitude
 
-    choice_field_keys = @form.choiceFieldKeys()
+    choice_field_keys             = @form.choiceFieldKeys()
+    choice_field_allow_other_keys = @form.choiceFieldAllowOtherKeys()
 
     # TODO: Support "other" values
     for choice_field_key in choice_field_keys
       if choice_field_key of form_obj
         value_or_values = form_obj[choice_field_key]
         value_or_values = if value_or_values instanceof Array then value_or_values else [value_or_values]
+        other_values = []
+        if choice_field_key in choice_field_allow_other_keys
+          if value_or_values.length > 0 and value_or_values[0] is 'rogen_other'
+            value_or_values = []
+            other_values = [$("##{choice_field_key}").next('.other_input').val()]
         form_obj[choice_field_key] =
           choice_values: value_or_values
-          other_values: []
+          other_values: other_values
 
     for photo_uploader in @photo_uploaders
       if photo_uploader.mediaCount() > 0
@@ -102,18 +108,31 @@ class Creator
       @formSubmit()
     @$modal_container.on 'shown.bs.modal', (event) =>
       @createMap()
-      $('.yes-no').on 'click', (event) =>
-        event.preventDefault()
-        $button = $(event.target)
-        $button.siblings('a.yes-no').removeClass 'active'
-        $button.addClass 'active'
-        $("##{$button.data('input-id')}").val $button.data('yes-no-val')
-      for photo_uploader in @photo_uploaders
-        photo_uploader.init()
-      for video_uploader in @video_uploaders
-        video_uploader.init()
+      @initModalShownEvents()
     @$modal_container.on 'hidden.bs.modal', (event) =>
       @destroy()
+
+  initModalShownEvents: ->
+    $('.yes-no').on 'click', (event) =>
+      event.preventDefault()
+      $button = $(event.target)
+      $button.siblings('a.yes-no').removeClass 'active'
+      $button.addClass 'active'
+      $("##{$button.data('input-id')}").val $button.data('yes-no-val')
+    for photo_uploader in @photo_uploaders
+      photo_uploader.init()
+    for video_uploader in @video_uploaders
+      video_uploader.init()
+    @$modal_container.find('.allow_other').each((index, obj) ->
+      $select = $(obj)
+      $select.on('change', (event) ->
+        $other_input = $select.next('.other_input')
+        if $select.val() is 'rogen_other'
+          $other_input.show()
+        else
+          $other_input.hide()
+      )
+    )
 
   #
   # Elements
@@ -162,11 +181,14 @@ class Creator
 
   generateChoiceField: (element) ->
     multiple = if element.multiple then ' multiple' else ''
-    choices = ['<option value=""></option>']
+    choices = if element.multiple then [] else ['<option value=""></option>']
     for choice in element.choices
       choices.push "<option value='#{choice.value}'>#{choice.label}</option>"
+    choices.push "<option value='rogen_other'>Other</option>" if element.allow_other and not element.multiple
     choices = choices.join ''
-    panel panelBody(formGroup("<label>#{element.label}</label><select class='form-control' data-fulcrum-field-type='#{element.type}' id='#{element.key}' name='#{element.key}'#{multiple}>#{choices}</select>", null, element.required))
+    form_group_content = "<label>#{element.label}</label><select class='form-control#{if element.allow_other and not element.multiple then ' allow_other' else ''}' data-fulcrum-field-type='#{element.type}' id='#{element.key}' name='#{element.key}'#{multiple}>#{choices}</select>"
+    form_group_content += '<input type="text" class="form-control other_input">' if element.allow_other and not element.multiple
+    panel panelBody(formGroup(form_group_content, null, element.required))
   #
   # /Elements
   #

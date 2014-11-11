@@ -105,6 +105,22 @@ Form = (function() {
     return keys;
   };
 
+  Form.prototype.choiceFieldAllowOtherKeys = function(iteratable) {
+    var element, keys, section_keys, _i, _iteratable, _len;
+    keys = [];
+    _iteratable = iteratable || this.form_obj.elements;
+    for (_i = 0, _len = _iteratable.length; _i < _len; _i++) {
+      element = _iteratable[_i];
+      if (element.type === 'ChoiceField' && element.allow_other && !element.multiple) {
+        keys.push(element.key);
+      } else if (element.type === 'Section') {
+        section_keys = this.choiceFieldKeys(element.elements);
+        Array.prototype.push.apply(keys, section_keys);
+      }
+    }
+    return keys;
+  };
+
   Form.prototype.name = function() {
     return this.form_obj.name;
   };
@@ -427,7 +443,8 @@ module.exports = Record;
 
 },{}],9:[function(require,module,exports){
 var Creator, PhotoUploader, VideoUploader, form, formGroup, map_utils, panel, panelBody, xhr,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 xhr = require('xhr');
 
@@ -494,21 +511,29 @@ Creator = (function() {
   };
 
   Creator.prototype.formSubmit = function() {
-    var choice_field_key, choice_field_keys, data, form_obj, latitude, longitude, photo_uploader, record, value_or_values, video_uploader, xhr_callback, xhr_options, _i, _j, _k, _len, _len1, _len2, _ref, _ref1;
+    var choice_field_allow_other_keys, choice_field_key, choice_field_keys, data, form_obj, latitude, longitude, other_values, photo_uploader, record, value_or_values, video_uploader, xhr_callback, xhr_options, _i, _j, _k, _len, _len1, _len2, _ref, _ref1;
     form_obj = this.$html_form.serializeObject();
     latitude = parseFloat(form_obj.latitude);
     longitude = parseFloat(form_obj.longitude);
     delete form_obj.latitude;
     delete form_obj.longitude;
     choice_field_keys = this.form.choiceFieldKeys();
+    choice_field_allow_other_keys = this.form.choiceFieldAllowOtherKeys();
     for (_i = 0, _len = choice_field_keys.length; _i < _len; _i++) {
       choice_field_key = choice_field_keys[_i];
       if (choice_field_key in form_obj) {
         value_or_values = form_obj[choice_field_key];
         value_or_values = value_or_values instanceof Array ? value_or_values : [value_or_values];
+        other_values = [];
+        if (__indexOf.call(choice_field_allow_other_keys, choice_field_key) >= 0) {
+          if (value_or_values.length > 0 && value_or_values[0] === 'rogen_other') {
+            value_or_values = [];
+            other_values = [$("#" + choice_field_key).next('.other_input').val()];
+          }
+        }
         form_obj[choice_field_key] = {
           choice_values: value_or_values,
-          other_values: []
+          other_values: other_values
         };
       }
     }
@@ -567,28 +592,8 @@ Creator = (function() {
     })(this));
     this.$modal_container.on('shown.bs.modal', (function(_this) {
       return function(event) {
-        var photo_uploader, video_uploader, _i, _j, _len, _len1, _ref, _ref1, _results;
         _this.createMap();
-        $('.yes-no').on('click', function(event) {
-          var $button;
-          event.preventDefault();
-          $button = $(event.target);
-          $button.siblings('a.yes-no').removeClass('active');
-          $button.addClass('active');
-          return $("#" + ($button.data('input-id'))).val($button.data('yes-no-val'));
-        });
-        _ref = _this.photo_uploaders;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          photo_uploader = _ref[_i];
-          photo_uploader.init();
-        }
-        _ref1 = _this.video_uploaders;
-        _results = [];
-        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-          video_uploader = _ref1[_j];
-          _results.push(video_uploader.init());
-        }
-        return _results;
+        return _this.initModalShownEvents();
       };
     })(this));
     return this.$modal_container.on('hidden.bs.modal', (function(_this) {
@@ -596,6 +601,43 @@ Creator = (function() {
         return _this.destroy();
       };
     })(this));
+  };
+
+  Creator.prototype.initModalShownEvents = function() {
+    var photo_uploader, video_uploader, _i, _j, _len, _len1, _ref, _ref1;
+    $('.yes-no').on('click', (function(_this) {
+      return function(event) {
+        var $button;
+        event.preventDefault();
+        $button = $(event.target);
+        $button.siblings('a.yes-no').removeClass('active');
+        $button.addClass('active');
+        return $("#" + ($button.data('input-id'))).val($button.data('yes-no-val'));
+      };
+    })(this));
+    _ref = this.photo_uploaders;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      photo_uploader = _ref[_i];
+      photo_uploader.init();
+    }
+    _ref1 = this.video_uploaders;
+    for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+      video_uploader = _ref1[_j];
+      video_uploader.init();
+    }
+    return this.$modal_container.find('.allow_other').each(function(index, obj) {
+      var $select;
+      $select = $(obj);
+      return $select.on('change', function(event) {
+        var $other_input;
+        $other_input = $select.next('.other_input');
+        if ($select.val() === 'rogen_other') {
+          return $other_input.show();
+        } else {
+          return $other_input.hide();
+        }
+      });
+    });
   };
 
   Creator.prototype.generateLabel = function(element) {
@@ -659,16 +701,23 @@ Creator = (function() {
   };
 
   Creator.prototype.generateChoiceField = function(element) {
-    var choice, choices, multiple, _i, _len, _ref;
+    var choice, choices, form_group_content, multiple, _i, _len, _ref;
     multiple = element.multiple ? ' multiple' : '';
-    choices = ['<option value=""></option>'];
+    choices = element.multiple ? [] : ['<option value=""></option>'];
     _ref = element.choices;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       choice = _ref[_i];
       choices.push("<option value='" + choice.value + "'>" + choice.label + "</option>");
     }
+    if (element.allow_other && !element.multiple) {
+      choices.push("<option value='rogen_other'>Other</option>");
+    }
     choices = choices.join('');
-    return panel(panelBody(formGroup("<label>" + element.label + "</label><select class='form-control' data-fulcrum-field-type='" + element.type + "' id='" + element.key + "' name='" + element.key + "'" + multiple + ">" + choices + "</select>", null, element.required)));
+    form_group_content = "<label>" + element.label + "</label><select class='form-control" + (element.allow_other && !element.multiple ? ' allow_other' : '') + "' data-fulcrum-field-type='" + element.type + "' id='" + element.key + "' name='" + element.key + "'" + multiple + ">" + choices + "</select>";
+    if (element.allow_other && !element.multiple) {
+      form_group_content += '<input type="text" class="form-control other_input">';
+    }
+    return panel(panelBody(formGroup(form_group_content, null, element.required)));
   };
 
   Creator.prototype.generateElement = function(element) {
